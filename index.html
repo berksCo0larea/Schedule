@@ -4,15 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Schedule</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 16px; }
   .app { max-width: 480px; margin: 0 auto; }
-  .header { margin-bottom: 16px; }
+
+  /* HEADER */
+  .header { margin-bottom: 16px; display: flex; align-items: flex-start; justify-content: space-between; }
+  .header-left {}
   .school-name { font-size: 11px; color: #888; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 2px; }
   .app-title { font-size: 26px; font-weight: 600; color: #111; }
-  .time-display { font-size: 13px; color: #888; text-align: right; margin-bottom: 14px; }
+  .settings-btn { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: 500; color: #444; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.15s; margin-top: 4px; }
+  .settings-btn:hover { background: #f0f0f0; }
+
+  /* STATUS BAR */
+  .status-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .time-display { font-size: 13px; color: #888; }
+  .status-right { display: flex; align-items: center; gap: 10px; }
+  .online-indicator { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #22c55e; font-weight: 500; }
+  .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse 1.5s infinite; }
+  .offline-indicator { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #f87171; font-weight: 500; }
+  .offline-dot { width: 7px; height: 7px; border-radius: 50%; background: #f87171; }
+  .runtime-badge { font-size: 11px; color: #aaa; background: #f0f0f0; border-radius: 6px; padding: 2px 8px; }
+
+  /* SETTINGS MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 24px 20px 36px; }
+  .modal-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 0 auto 20px; }
+  .modal-title { font-size: 18px; font-weight: 600; color: #111; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: #aaa; margin-bottom: 20px; }
+  .elective-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .elective-btn { padding: 14px 12px; border-radius: 12px; border: 2px solid #e5e5e5; background: #fff; font-size: 14px; font-weight: 600; color: #444; cursor: pointer; text-align: left; transition: all 0.15s; display: flex; align-items: center; gap: 8px; }
+  .elective-btn .elective-icon { font-size: 20px; }
+  .elective-btn.selected { border-color: #111; background: #111; color: #fff; }
+  .elective-btn:hover:not(.selected) { border-color: #bbb; background: #fafafa; }
+  .modal-save { width: 100%; margin-top: 18px; padding: 14px; border-radius: 12px; background: #111; color: #fff; font-size: 15px; font-weight: 600; border: none; cursor: pointer; }
+  .modal-save:hover { background: #333; }
+
+  /* CARDS */
   .current-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 16px; padding: 20px; margin-bottom: 12px; position: relative; overflow: hidden; }
   .current-card .accent { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
   .current-card .inner { padding-left: 12px; }
@@ -29,6 +59,8 @@
   .next-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
   .next-class { font-size: 15px; font-weight: 600; color: #111; }
   .next-time { font-size: 13px; color: #888; }
+
+  /* TABS & LIST */
   .day-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; }
   .day-tab { padding: 7px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; border: 1px solid #e5e5e5; cursor: pointer; white-space: nowrap; background: #fff; color: #888; }
   .day-tab.active { background: #111; color: #fff; border-color: #111; }
@@ -45,30 +77,73 @@
   .room-badge { font-size: 11px; color: #aaa; background: #f5f5f5; border-radius: 6px; padding: 2px 7px; flex-shrink: 0; }
   .dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .no-school { text-align: center; padding: 40px 20px; color: #aaa; font-size: 15px; }
+
+  /* FOOTER */
+  .footer { margin-top: 28px; padding-top: 16px; border-top: 1px solid #e5e5e5; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .footer-text { font-size: 12px; color: #bbb; }
+  .footer-code { font-size: 13px; color: #bbb; font-weight: 700; font-family: monospace; letter-spacing: -0.5px; }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="header">
-    <div class="school-name">P.S./I.S. 104 · Grade 6 · Class 601</div>
-    <div class="app-title">My Schedule</div>
+    <div class="header-left">
+      <div class="school-name">P.S./I.S. 104 · Grade 6 · Class 601</div>
+      <div class="app-title">My Schedule</div>
+    </div>
+    <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
   </div>
-  <div class="time-display" id="clock"></div>
+
+  <div class="status-bar">
+    <div class="time-display" id="clock"></div>
+    <div class="status-right">
+      <div id="online-status"></div>
+      <div class="runtime-badge" id="runtime-badge">↑ 0s</div>
+    </div>
+  </div>
+
   <div id="current-section"></div>
   <div id="next-section"></div>
   <div class="day-tabs" id="day-tabs"></div>
   <div class="schedule-list" id="schedule-list"></div>
+
+  <div class="footer">
+    <span class="footer-code">&lt;/&gt;</span>
+    <span class="footer-text">Coded by Berk</span>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Settings</div>
+    <div class="modal-sub">Choose your elective to personalize your schedule</div>
+    <div class="elective-grid" id="elective-grid"></div>
+    <button class="modal-save" onclick="saveSettings()">Save</button>
+  </div>
 </div>
 
 <script>
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
 const toMins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
-const schedule = {
+
+const ELECTIVES = [
+  { name: 'Math Olympiad Elective', icon: '🏅' },
+  { name: 'Science Elective',       icon: '🔬' },
+  { name: 'Nutrition Elective',     icon: '🥗' },
+  { name: 'Coding Elective',        icon: '💻' },
+  { name: 'Journalism Elective',    icon: '📰' },
+];
+
+let selectedElective = localStorage.getItem('selectedElective') || 'Math Olympiad Elective';
+let pendingElective = selectedElective;
+
+const baseSchedule = {
   Monday: [
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
     {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'Electives',teacher:'Petrizzo',room:'208',start:'9:50',end:'10:35'},
+    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
     {p:4,name:'Chorus 6',teacher:'Castine',room:'308',start:'10:35',end:'11:20'},
     {p:5,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
     {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
@@ -78,7 +153,7 @@ const schedule = {
   Tuesday: [
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
     {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'Electives',teacher:'Petrizzo',room:'208',start:'9:50',end:'10:35'},
+    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
     {p:4,name:'Chorus 6',teacher:'Castine',room:'308',start:'10:35',end:'11:20'},
     {p:5,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
     {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
@@ -88,7 +163,7 @@ const schedule = {
   Wednesday: [
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
     {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'Elective',teacher:'Petrizzo',room:'208',start:'9:50',end:'10:35'},
+    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
     {p:4,name:'Technology 6',teacher:'Logozzo',room:'208',start:'10:35',end:'11:20'},
     {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
     {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
@@ -98,7 +173,7 @@ const schedule = {
   Thursday: [
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
     {p:2,name:'Health 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'Electives',teacher:'Petrizzo',room:'208',start:'9:50',end:'10:35'},
+    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
     {p:4,name:'Civics For All',teacher:'Zera',room:'208',start:'10:35',end:'11:20'},
     {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
     {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
@@ -116,15 +191,48 @@ const schedule = {
     {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
   ],
 };
+
+function getSchedule() {
+  const out = {};
+  for (const [day, periods] of Object.entries(baseSchedule)) {
+    out[day] = periods.map(p => ({
+      ...p,
+      name: p.name === '__ELECTIVE__' ? selectedElective : p.name,
+    }));
+  }
+  return out;
+}
+
 const COLORS = ['#7F77DD','#1D9E75','#D85A30','#D4537E','#378ADD','#639922','#BA7517','#E24B4A'];
 let selectedDay = null;
+const startTime = Date.now();
+
 function getNYTime() { return new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'})); }
 function getDayName(d) { return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]; }
 function fmt12(t) { const [h,m]=t.split(':').map(Number); const ampm=h>=12?'PM':'AM'; const h12=h%12||12; return `${h12}:${String(m).padStart(2,'0')} ${ampm}`; }
 function fmtCountdown(secs) { if(secs<=0)return'0:00'; const m=Math.floor(secs/60); const s=secs%60; return `${m}:${String(s).padStart(2,'0')}`; }
-function getCurrentPeriod(day,now) { const nowMins=now.getHours()*60+now.getMinutes(); if(!schedule[day])return null; for(const p of schedule[day]){if(nowMins>=toMins(p.start)&&nowMins<toMins(p.end))return p;} return null; }
-function getNextPeriod(day,now) { const nowMins=now.getHours()*60+now.getMinutes(); if(!schedule[day])return null; for(const p of schedule[day]){if(toMins(p.start)>nowMins)return p;} return null; }
+function fmtRuntime(ms) {
+  const s = Math.floor(ms/1000);
+  if (s < 60) return `↑ ${s}s`;
+  const m = Math.floor(s/60); const rs = s%60;
+  if (m < 60) return `↑ ${m}m ${rs}s`;
+  const h = Math.floor(m/60); const rm = m%60;
+  return `↑ ${h}h ${rm}m`;
+}
+function getCurrentPeriod(day,now,schedule) { const nowMins=now.getHours()*60+now.getMinutes(); if(!schedule[day])return null; for(const p of schedule[day]){if(nowMins>=toMins(p.start)&&nowMins<toMins(p.end))return p;} return null; }
+function getNextPeriod(day,now,schedule) { const nowMins=now.getHours()*60+now.getMinutes(); if(!schedule[day])return null; for(const p of schedule[day]){if(toMins(p.start)>nowMins)return p;} return null; }
+
+function updateOnlineStatus() {
+  const el = document.getElementById('online-status');
+  if (navigator.onLine) {
+    el.innerHTML = `<div class="online-indicator"><div class="online-dot"></div>Online</div>`;
+  } else {
+    el.innerHTML = `<div class="offline-indicator"><div class="offline-dot"></div>Offline</div>`;
+  }
+}
+
 function render() {
+  const schedule = getSchedule();
   const now = getNYTime();
   const realDay = getDayName(now);
   const isSchoolDay = DAYS.includes(realDay);
@@ -132,14 +240,19 @@ function render() {
   const hh=String(now.getHours()).padStart(2,'0');
   const mm=String(now.getMinutes()).padStart(2,'0');
   document.getElementById('clock').textContent = `${fmt12(hh+':'+mm)} · ${realDay}`;
+  document.getElementById('runtime-badge').textContent = fmtRuntime(Date.now() - startTime);
+  updateOnlineStatus();
+
   const tabs = document.getElementById('day-tabs');
   tabs.innerHTML = DAYS.map(d=>`<div class="day-tab${viewDay===d?' active':''}" onclick="selectDay('${d}')">${d.slice(0,3)}</div>`).join('');
+
   const dayPeriods = schedule[viewDay]||[];
   const isToday = viewDay===realDay && isSchoolDay;
-  const cur = isToday ? getCurrentPeriod(viewDay,now) : null;
-  const nxt = isToday ? getNextPeriod(viewDay,now) : null;
+  const cur = isToday ? getCurrentPeriod(viewDay,now,schedule) : null;
+  const nxt = isToday ? getNextPeriod(viewDay,now,schedule) : null;
   const curSec = document.getElementById('current-section');
   const nxtSec = document.getElementById('next-section');
+
   if(!isToday){ curSec.innerHTML=''; nxtSec.innerHTML=''; }
   else if(cur){
     const endMins=toMins(cur.end);
@@ -155,10 +268,12 @@ function render() {
     const nowMins=now.getHours()*60+now.getMinutes();
     const firstStart=toMins(dayPeriods[0]?.start||'8:20');
     if(nowMins<firstStart){ curSec.innerHTML=`<div class="current-card"><div style="padding:4px"><div class="period-label">school hasn't started yet</div><div class="class-name">First period at ${fmt12(dayPeriods[0]?.start||'8:20')}</div></div></div>`; }
-    else { curSec.innerHTML=`<div class="current-card"><div style="padding:4px"><div class="period-label">school is done for today 🎉</div><div class="class-name">See you tomorrow!</div></div></div>`; }
+    else { curSec.innerHTML=`<div class="current-card"><div style="padding:4px"><div class="period-label">school's done</div><div class="class-name">See you tomorrow!</div></div></div>`; }
   }
+
   if(isToday&&nxt){ nxtSec.innerHTML=`<div class="next-card"><div><div class="next-label">up next · Period ${nxt.p}</div><div class="next-class">${nxt.name}</div></div><div class="next-time">${fmt12(nxt.start)}</div></div>`; }
   else { nxtSec.innerHTML=''; }
+
   const nowMins=now.getHours()*60+now.getMinutes();
   const list=document.getElementById('schedule-list');
   list.innerHTML=dayPeriods.map(p=>{
@@ -167,9 +282,45 @@ function render() {
     return `<div class="period-row${isActive?' active-row':isPast?' past-row':''}"><div class="period-num${isActive?' active-num':''}">${p.p}</div><div class="period-info"><div class="period-class">${p.name}</div><div class="period-teacher">${p.teacher}</div></div><div class="room-badge">Rm ${p.room}</div><div class="period-time">${fmt12(p.start)}</div>${isActive?'<div class="dot"></div>':''}</div>`;
   }).join('');
 }
+
+// Settings modal
+function openSettings() {
+  pendingElective = selectedElective;
+  const grid = document.getElementById('elective-grid');
+  grid.innerHTML = ELECTIVES.map(e =>
+    `<button class="elective-btn${e.name===pendingElective?' selected':''}" onclick="pickElective('${e.name}')">
+      <span class="elective-icon">${e.icon}</span>${e.name}
+    </button>`
+  ).join('');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function pickElective(name) {
+  pendingElective = name;
+  document.querySelectorAll('.elective-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.textContent.trim().includes(name));
+  });
+}
+
+function saveSettings() {
+  selectedElective = pendingElective;
+  localStorage.setItem('selectedElective', selectedElective);
+  document.getElementById('modal-overlay').classList.remove('open');
+  render();
+}
+
+function overlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
 window.selectDay = function(d){ selectedDay=d; render(); };
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
 render();
-setInterval(render,1000);
+setInterval(render, 1000);
 </script>
 </body>
 </html>
