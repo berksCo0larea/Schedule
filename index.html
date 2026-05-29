@@ -8,469 +8,373 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f0efeb;
-    --bg2: #ffffff;
-    --bg3: #f7f6f2;
-    --border: #e2e0d8;
-    --border2: #d0cec4;
-    --text: #1a1916;
-    --text2: #6b6860;
-    --text3: #a8a59e;
-    --accent: #1a1916;
-    --accent-inv: #ffffff;
+    --bg: #f0efeb; --bg2: #ffffff; --bg3: #f7f6f2;
+    --border: #e2e0d8; --border2: #d0cec4;
+    --text: #1a1916; --text2: #6b6860; --text3: #a8a59e;
+    --accent: #1a1916; --accent-inv: #ffffff;
     --card-shadow: 0 2px 8px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
     --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06);
-    --blob1: rgba(255,200,100,0.25);
-    --blob2: rgba(150,200,255,0.2);
-    --blob3: rgba(200,150,255,0.15);
-    --blob4: rgba(100,220,180,0.18);
-    --noise-opacity: 0.03;
-    --font: 'Nunito', sans-serif;
-    --mono: 'JetBrains Mono', monospace;
+    --font: 'Nunito', sans-serif; --mono: 'JetBrains Mono', monospace;
   }
   [data-theme="dark"] {
-    --bg: #111010;
-    --bg2: #1c1b1a;
-    --bg3: #161514;
-    --border: #2c2a28;
-    --border2: #3a3835;
-    --text: #f0ede8;
-    --text2: #9e9b96;
-    --text3: #5c5a56;
-    --accent: #f0ede8;
-    --accent-inv: #111010;
+    --bg: #111010; --bg2: #1c1b1a; --bg3: #161514;
+    --border: #2c2a28; --border2: #3a3835;
+    --text: #f0ede8; --text2: #9e9b96; --text3: #5c5a56;
+    --accent: #f0ede8; --accent-inv: #111010;
     --card-shadow: 0 2px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
     --card-shadow-hover: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.07);
-    --blob1: rgba(255,160,60,0.12);
-    --blob2: rgba(80,140,255,0.1);
-    --blob3: rgba(180,80,255,0.09);
-    --blob4: rgba(40,200,140,0.1);
-    --noise-opacity: 0.06;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
-    font-family: var(--font);
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    min-height: 100vh; overflow-x: hidden;
+    transition: background 0.4s, color 0.4s;
+  }
+  canvas#bg-canvas { position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0; }
+
+  /* ══════════════════════════════════════
+     SCREEN MANAGER
+  ══════════════════════════════════════ */
+  .screen { position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column; transition:opacity 0.5s, transform 0.5s; }
+  .screen.hidden { opacity:0; pointer-events:none; transform:scale(0.96); }
+  .screen.gone { display:none; }
+
+  /* ══════════════════════════════════════
+     ENTRANCE SCREEN
+  ══════════════════════════════════════ */
+  #entrance-screen {
     background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 16px;
-    transition: background 0.4s ease, color 0.4s ease;
-    overflow-x: hidden;
+    gap: 0;
+    padding: 32px 24px;
   }
-
-  /* ── ANIMATED BACKGROUND (canvas) ── */
-  #bg-canvas { display: block; }
-
-  /* Noise texture overlay */
-  .bg-canvas::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-    opacity: var(--noise-opacity);
-    pointer-events: none;
+  .entrance-inner {
+    max-width: 420px; width: 100%;
+    display: flex; flex-direction: column; align-items: center; gap: 0;
   }
-
-  /* ── APP WRAPPER ── */
-  .app {
-    max-width: 480px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
+  .entrance-logo {
+    width: 72px; height: 72px; border-radius: 22px;
+    background: var(--accent); display: flex; align-items: center; justify-content: center;
+    font-size: 34px; margin-bottom: 22px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+    animation: logoBounce 0.9s cubic-bezier(0.34,1.56,0.64,1) both 0.1s;
   }
-
-  /* ── HEADER ── */
-  .header {
-    margin-bottom: 16px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+  .entrance-title {
+    font-size: 34px; font-weight: 900; letter-spacing: -1px; color: var(--text);
+    text-align: center; margin-bottom: 6px;
+    animation: slideDown 0.7s cubic-bezier(0.34,1.56,0.64,1) both 0.25s;
   }
-  .school-name {
-    font-size: 11px;
-    color: var(--text3);
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    margin-bottom: 2px;
-    font-weight: 700;
+  .entrance-sub {
+    font-size: 14px; color: var(--text3); font-weight: 700; text-align: center;
+    margin-bottom: 36px;
+    animation: slideDown 0.7s cubic-bezier(0.34,1.56,0.64,1) both 0.32s;
   }
-  .app-title {
-    font-size: 28px;
-    font-weight: 900;
-    color: var(--text);
-    letter-spacing: -0.5px;
+  .class-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    width: 100%; margin-bottom: 10px;
   }
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 4px;
-  }
-  .theme-btn {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    border: 1.5px solid var(--border2);
-    background: var(--bg2);
+  .class-btn {
+    padding: 18px 14px; border-radius: 18px;
+    border: 2px solid var(--border2); background: var(--bg2);
+    font-family: var(--font); font-size: 15px; font-weight: 900;
+    color: var(--text); cursor: pointer; text-align: left;
+    display: flex; flex-direction: column; gap: 4px;
     box-shadow: var(--card-shadow);
-    font-size: 16px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, background 0.3s;
-    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, background 0.2s, border-color 0.2s;
+    animation: bounceIn 0.65s cubic-bezier(0.34,1.56,0.64,1) both;
   }
-  .theme-btn:hover { transform: scale(1.2) rotate(20deg); box-shadow: var(--card-shadow-hover); }
-  .theme-btn:active { animation: btnPop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
-
-  .settings-btn {
-    background: var(--bg2);
-    border: 1.5px solid var(--border2);
-    border-radius: 12px;
-    padding: 8px 14px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text2);
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    box-shadow: var(--card-shadow);
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, background 0.3s, color 0.3s;
+  .class-btn.active-class {
+    border-color: var(--accent); background: var(--accent); color: var(--accent-inv);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .class-btn:hover:not(.coming-soon-btn) { transform: translateY(-4px) scale(1.03); box-shadow: var(--card-shadow-hover); }
+  .class-btn:active:not(.coming-soon-btn) { transform: scale(0.95); }
+  .class-btn-label { font-size: 11px; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; }
+  .class-btn.active-class .class-btn-label { color: var(--accent-inv); opacity: 0.6; }
+  .coming-soon-btn {
+    cursor: not-allowed; opacity: 0.45;
+    position: relative; overflow: hidden;
+  }
+  .cs-tag {
+    font-size: 9px; font-weight: 900; background: var(--border2); color: var(--text3);
+    border-radius: 6px; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.06em;
+    display: inline-block; margin-top: 2px;
+  }
+  .entrance-continue {
+    width: 100%; padding: 16px; border-radius: 16px;
+    background: var(--accent); color: var(--accent-inv);
+    font-size: 16px; font-weight: 900; border: none; cursor: pointer;
     font-family: var(--font);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+    margin-top: 8px;
+    animation: slideUp 0.7s cubic-bezier(0.34,1.56,0.64,1) both 0.55s;
   }
-  .settings-btn:hover {
-    background: var(--accent);
-    color: var(--accent-inv);
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: var(--card-shadow-hover);
+  .entrance-continue:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.22); }
+  .entrance-continue:active { transform: scale(0.96); }
+  .entrance-theme-row {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 22px;
+    animation: fadeIn 0.5s ease both 0.7s;
   }
-  .settings-btn:active { animation: btnPop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
-
-  /* ── STATUS BAR ── */
-  .status-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .time-display {
-    font-size: 13px;
-    color: var(--text3);
-    font-family: var(--mono);
-    font-weight: 500;
-  }
-  .status-right { display: flex; align-items: center; gap: 10px; }
-  .online-indicator { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #22c55e; font-weight: 700; }
-  .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: pulse 1.5s infinite; }
-  .offline-indicator { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #f87171; font-weight: 700; }
-  .offline-dot { width: 7px; height: 7px; border-radius: 50%; background: #f87171; }
-  .runtime-badge {
-    font-size: 11px;
-    color: var(--text3);
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px 9px;
-    font-family: var(--mono);
-    font-weight: 500;
-  }
-
-  /* ── CURRENT CARD ── */
-  .current-card {
-    background: var(--bg2);
-    border: 1.5px solid var(--border);
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 10px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--card-shadow);
-    transition: box-shadow 0.3s, border-color 0.3s, background 0.3s;
-  }
-  .current-card:hover { box-shadow: var(--card-shadow-hover); }
-  .current-card .accent {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
-    border-radius: 4px 0 0 4px;
-  }
-  .current-card .inner { padding-left: 14px; }
-  .period-label {
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 6px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .class-name {
-    font-size: 23px;
-    font-weight: 900;
-    color: var(--text);
-    margin-bottom: 3px;
-    letter-spacing: -0.3px;
-  }
-  .teacher { font-size: 14px; color: var(--text3); margin-bottom: 14px; font-weight: 600; }
-  .time-row { display: flex; align-items: center; gap: 20px; }
-  .countdown { font-size: 30px; font-weight: 900; color: var(--text); font-family: var(--mono); letter-spacing: -1px; }
-  .countdown-label { font-size: 12px; color: var(--text3); font-weight: 600; }
-  .time-badge { font-size: 13px; color: var(--text2); display: flex; align-items: center; gap: 5px; font-weight: 600; font-family: var(--mono); }
-  .progress-bar {
-    height: 5px;
-    background: var(--border);
-    border-radius: 3px;
-    margin-top: 16px;
-    overflow: hidden;
-  }
-  .progress-fill { height: 100%; border-radius: 3px; transition: width 1s linear; }
-
-  /* ── NEXT CARD ── */
-  .next-card {
-    background: var(--bg2);
-    border-radius: 14px;
-    padding: 13px 16px;
-    margin-bottom: 14px;
-    display: flex; align-items: center; justify-content: space-between;
-    border: 1.5px solid var(--border);
-    box-shadow: var(--card-shadow);
-    cursor: default;
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, background 0.3s;
-  }
-  .next-card:hover { transform: translateY(-2px) scale(1.01); box-shadow: var(--card-shadow-hover); }
-  .next-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; font-weight: 800; }
-  .next-class { font-size: 15px; font-weight: 800; color: var(--text); }
-  .next-time { font-size: 13px; color: var(--text2); font-family: var(--mono); font-weight: 500; }
-
-  /* ── TABS ── */
-  .day-tabs {
-    display: flex; gap: 6px;
-    margin-bottom: 10px;
-    overflow-x: auto;
-    padding: 6px 4px 8px;
-    margin-left: -4px;
-    margin-right: -4px;
-  }
-  .day-tabs::-webkit-scrollbar { display: none; }
-  .day-tab {
-    padding: 8px 18px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 800;
-    border: 1.5px solid var(--border);
-    cursor: pointer;
-    white-space: nowrap;
-    background: var(--bg2);
-    color: var(--text3);
-    box-shadow: var(--card-shadow);
-    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, background 0.25s, color 0.25s, border-color 0.25s;
-    font-family: var(--font);
-  }
-  .day-tab:hover:not(.active) {
-    transform: translateY(-4px) scale(1.06);
-    box-shadow: var(--card-shadow-hover);
-    color: var(--text);
-  }
-  .day-tab:active { animation: btnPop 0.3s cubic-bezier(0.34,1.56,0.64,1); }
-  .day-tab.active {
-    background: var(--accent);
-    color: var(--accent-inv);
-    border-color: var(--accent);
-    transform: translateY(-3px) scale(1.07);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
-  }
-
-  /* ── SCHEDULE LIST ── */
-  .schedule-list {
-    display: flex; flex-direction: column; gap: 6px;
-  }
-  .period-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 14px;
-    background: var(--bg2);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    box-shadow: var(--card-shadow);
-    cursor: default;
-    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, opacity 0.3s, background 0.3s;
-  }
-  .period-row:hover:not(.past-row) {
-    transform: translateX(6px) scale(1.015);
-    box-shadow: var(--card-shadow-hover);
-  }
-  .period-row:active:not(.past-row) { animation: btnPop 0.3s cubic-bezier(0.34,1.56,0.64,1); }
-  .period-row.active-row { border-color: var(--border2); background: var(--bg3); }
-  .period-row.past-row { opacity: 0.35; }
-  .period-num {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--bg3);
-    border: 1.5px solid var(--border);
+  .entrance-theme-btn {
+    background: var(--bg2); border: 1.5px solid var(--border2); border-radius: 50%;
+    width: 36px; height: 36px; font-size: 16px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 800; color: var(--text3);
-    flex-shrink: 0;
-    transition: background 0.3s, color 0.3s, border-color 0.3s;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
   }
-  .period-num.active-num {
-    background: var(--accent); color: var(--accent-inv); border-color: var(--accent);
-    animation: popPulse 2s ease-in-out infinite;
-  }
-  .period-info { flex: 1; min-width: 0; }
-  .period-class { font-size: 14px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .period-teacher { font-size: 12px; color: var(--text3); font-weight: 600; }
-  .period-time { font-size: 12px; color: var(--text3); white-space: nowrap; flex-shrink: 0; font-family: var(--mono); font-weight: 500; }
-  .room-badge {
-    font-size: 11px; color: var(--text3);
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px; padding: 3px 8px;
-    flex-shrink: 0; font-weight: 700; font-family: var(--mono);
-  }
-  .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #22c55e; flex-shrink: 0;
-    animation: pulse 1.5s infinite;
-  }
+  .entrance-theme-btn:hover { transform: scale(1.2) rotate(20deg); }
 
-  /* ── MODAL ── */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(8px);
-    z-index: 100; align-items: flex-end; justify-content: center;
+  /* ══════════════════════════════════════
+     ELECTIVE SCREEN
+  ══════════════════════════════════════ */
+  #elective-screen { background: var(--bg); padding: 32px 24px; }
+  .elective-inner { max-width: 420px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .elective-back {
+    align-self: flex-start; background: var(--bg2); border: 1.5px solid var(--border2);
+    border-radius: 12px; padding: 8px 14px; font-size: 13px; font-weight: 800;
+    color: var(--text2); cursor: pointer; font-family: var(--font);
+    box-shadow: var(--card-shadow); margin-bottom: 22px;
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
   }
-  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
-  .modal {
-    background: var(--bg2);
-    border-radius: 24px 24px 0 0;
-    width: 100%; max-width: 480px;
-    padding: 24px 20px 40px;
-    border-top: 1.5px solid var(--border);
-    box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
-    animation: slideUpModal 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  .modal-handle {
-    width: 40px; height: 4px;
-    background: var(--border2); border-radius: 2px;
-    margin: 0 auto 22px;
-  }
-  .modal-title { font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 5px; }
-  .modal-sub { font-size: 13px; color: var(--text3); margin-bottom: 20px; font-weight: 600; }
-  .elective-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .elective-back:hover { transform: translateX(-4px) scale(1.04); box-shadow: var(--card-shadow-hover); }
+  .elective-emoji { font-size: 44px; margin-bottom: 14px; }
+  .elective-title { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; color: var(--text); margin-bottom: 6px; text-align: center; }
+  .elective-sub { font-size: 13px; color: var(--text3); font-weight: 700; text-align: center; margin-bottom: 28px; }
+  .elective-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 16px; }
   .elective-btn {
-    padding: 14px 12px;
-    border-radius: 14px;
-    border: 2px solid var(--border);
-    background: var(--bg3);
-    font-size: 14px; font-weight: 800;
-    color: var(--text2);
-    cursor: pointer;
-    text-align: left;
-    display: flex; align-items: center; gap: 8px;
+    padding: 16px 12px; border-radius: 16px; border: 2px solid var(--border);
+    background: var(--bg3); font-size: 13px; font-weight: 800; color: var(--text2);
+    cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px;
     font-family: var(--font);
     transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, background 0.2s, border-color 0.2s, color 0.2s;
   }
-  .elective-btn .elective-icon { font-size: 20px; }
-  .elective-btn.selected { border-color: var(--accent); background: var(--accent); color: var(--accent-inv); transform: scale(1.04); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .elective-btn .ei { font-size: 20px; }
+  .elective-btn.selected { border-color: var(--accent); background: var(--accent); color: var(--accent-inv); transform: scale(1.04); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
   .elective-btn:hover:not(.selected) { transform: translateY(-3px) scale(1.02); box-shadow: var(--card-shadow-hover); border-color: var(--border2); }
-  .elective-btn:active { transform: scale(0.95); }
-  .modal-save {
-    width: 100%; margin-top: 18px; padding: 15px;
-    border-radius: 14px; background: var(--accent);
-    color: var(--accent-inv); font-size: 15px; font-weight: 900;
-    border: none; cursor: pointer; font-family: var(--font);
+  .elective-continue {
+    width: 100%; padding: 16px; border-radius: 16px; background: var(--accent);
+    color: var(--accent-inv); font-size: 16px; font-weight: 900; border: none; cursor: pointer;
+    font-family: var(--font); box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
   }
-  .modal-save:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 10px 28px rgba(0,0,0,0.2); }
-  .modal-save:active { animation: btnPop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+  .elective-continue:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.22); }
+  .elective-continue:active { transform: scale(0.96); }
 
-  /* ── FOOTER ── */
-  .footer {
-    margin-top: 28px; padding-top: 16px;
-    border-top: 1.5px solid var(--border);
-    display: flex; align-items: center; justify-content: center; gap: 7px;
+  /* ══════════════════════════════════════
+     LOADING SCREEN
+  ══════════════════════════════════════ */
+  #loading-screen { background: var(--bg); flex-direction: column; gap: 0; }
+  .loading-canvas-wrap { position: relative; width: 220px; height: 220px; margin-bottom: 20px; }
+  #balance-canvas { display: block; }
+  .loading-label {
+    font-size: 15px; font-weight: 800; color: var(--text2); letter-spacing: 0.02em;
+    margin-bottom: 10px; text-align: center;
+    animation: pulse 1.8s ease-in-out infinite;
   }
-  .footer-text { font-size: 12px; color: var(--text3); font-weight: 700; }
-  .footer-code { font-size: 13px; color: var(--text3); font-weight: 700; font-family: var(--mono); }
-
-  /* ── ANIMATIONS ── */
-  @keyframes slideDown {
-    0%   { opacity: 0; transform: translateY(-30px) scale(0.95); }
-    60%  { opacity: 1; transform: translateY(6px) scale(1.02); }
-    80%  { transform: translateY(-3px) scale(0.99); }
-    100% { transform: translateY(0) scale(1); }
+  .loading-bar-wrap {
+    width: 160px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden;
   }
-  @keyframes slideUp {
-    0%   { opacity: 0; transform: translateY(30px) scale(0.95); }
-    60%  { opacity: 1; transform: translateY(-6px) scale(1.02); }
-    80%  { transform: translateY(3px) scale(0.99); }
-    100% { transform: translateY(0) scale(1); }
+  .loading-bar-fill {
+    height: 100%; background: var(--accent); border-radius: 3px;
+    width: 0%; transition: width 0.08s linear;
   }
-  @keyframes bounceIn {
-    0%   { opacity: 0; transform: scale(0.6) translateY(20px); }
-    50%  { opacity: 1; transform: scale(1.08) translateY(-6px); }
-    70%  { transform: scale(0.96) translateY(3px); }
-    85%  { transform: scale(1.03) translateY(-2px); }
-    100% { transform: scale(1) translateY(0); }
+  .loading-dots { display: flex; gap: 7px; margin-top: 18px; }
+  .loading-dot {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--border2);
+    animation: loadDot 1.2s ease-in-out infinite;
   }
-  @keyframes fadeIn {
-    from { opacity: 0; } to { opacity: 1; }
-  }
-  @keyframes slideUpModal {
-    0%   { transform: translateY(80px) scale(0.97); opacity: 0; }
-    60%  { transform: translateY(-8px) scale(1.01); opacity: 1; }
-    80%  { transform: translateY(4px) scale(0.995); }
-    100% { transform: translateY(0) scale(1); }
-  }
-  @keyframes popPulse {
-    0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0,0,0,0); }
-    50% { transform: scale(1.12); box-shadow: 0 0 0 4px rgba(0,0,0,0.1); }
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.85); }
-  }
-  @keyframes btnPop {
-    0%   { transform: scale(1); }
-    30%  { transform: scale(0.88); }
-    65%  { transform: scale(1.12); }
-    82%  { transform: scale(0.97); }
-    100% { transform: scale(1); }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes loadDot {
+    0%,80%,100% { transform: scale(0.7); background: var(--border2); }
+    40% { transform: scale(1.2); background: var(--accent); }
   }
 
-  /* period-row hover/active handled via JS class .intro-done */
+  /* ══════════════════════════════════════
+     MAIN SCHEDULE APP
+  ══════════════════════════════════════ */
+  #app-screen {
+    position: fixed; inset: 0; z-index: 10; overflow-y: auto;
+    background: var(--bg);
+    transition: opacity 0.5s, transform 0.5s;
+    display: block; padding: 16px;
+  }
+  #app-screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.96); }
+  #app-screen.gone { display: none; }
+  .app { max-width: 480px; margin: 0 auto; position: relative; z-index: 1; }
+  .header { margin-bottom: 16px; display: flex; align-items: flex-start; justify-content: space-between; }
+  .school-name { font-size: 11px; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 2px; font-weight: 700; }
+  .app-title { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
+  .header-right { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .theme-btn { width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:var(--bg2);box-shadow:var(--card-shadow);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.3s; flex-shrink:0; }
+  .theme-btn:hover { transform:scale(1.2) rotate(20deg);box-shadow:var(--card-shadow-hover); }
+  .settings-btn { background:var(--bg2);border:1.5px solid var(--border2);border-radius:12px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:var(--card-shadow);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.3s,color 0.3s;font-family:var(--font); }
+  .settings-btn:hover { background:var(--accent);color:var(--accent-inv);transform:translateY(-3px) scale(1.05);box-shadow:var(--card-shadow-hover); }
+  .status-bar { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px; }
+  .time-display { font-size:13px;color:var(--text3);font-family:var(--mono);font-weight:500; }
+  .status-right { display:flex;align-items:center;gap:10px; }
+  .online-indicator { display:flex;align-items:center;gap:5px;font-size:12px;color:#22c55e;font-weight:700; }
+  .online-dot { width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.5s infinite; }
+  .offline-indicator { display:flex;align-items:center;gap:5px;font-size:12px;color:#f87171;font-weight:700; }
+  .offline-dot { width:7px;height:7px;border-radius:50%;background:#f87171; }
+  .runtime-badge { font-size:11px;color:var(--text3);background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px 9px;font-family:var(--mono);font-weight:500; }
+  .current-card { background:var(--bg2);border:1.5px solid var(--border);border-radius:20px;padding:20px;margin-bottom:10px;position:relative;overflow:hidden;box-shadow:var(--card-shadow);transition:box-shadow 0.3s,border-color 0.3s,background 0.3s; }
+  .current-card:hover { box-shadow:var(--card-shadow-hover); }
+  .current-card .accent { position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:4px 0 0 4px; }
+  .current-card .inner { padding-left:14px; }
+  .period-label { font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;display:flex;align-items:center;gap:6px; }
+  .class-name { font-size:23px;font-weight:900;color:var(--text);margin-bottom:3px;letter-spacing:-0.3px; }
+  .teacher { font-size:14px;color:var(--text3);margin-bottom:14px;font-weight:600; }
+  .time-row { display:flex;align-items:center;gap:20px; }
+  .countdown { font-size:30px;font-weight:900;color:var(--text);font-family:var(--mono);letter-spacing:-1px; }
+  .countdown-label { font-size:12px;color:var(--text3);font-weight:600; }
+  .time-badge { font-size:13px;color:var(--text2);display:flex;align-items:center;gap:5px;font-weight:600;font-family:var(--mono); }
+  .progress-bar { height:5px;background:var(--border);border-radius:3px;margin-top:16px;overflow:hidden; }
+  .progress-fill { height:100%;border-radius:3px;transition:width 1s linear; }
+  .next-card { background:var(--bg2);border-radius:14px;padding:13px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--border);box-shadow:var(--card-shadow);cursor:default;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.3s; }
+  .next-card:hover { transform:translateY(-2px) scale(1.01);box-shadow:var(--card-shadow-hover); }
+  .next-label { font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;font-weight:800; }
+  .next-class { font-size:15px;font-weight:800;color:var(--text); }
+  .next-time { font-size:13px;color:var(--text2);font-family:var(--mono);font-weight:500; }
+  .day-tabs { display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding:6px 4px 8px;margin-left:-4px;margin-right:-4px; }
+  .day-tabs::-webkit-scrollbar { display:none; }
+  .day-tab { padding:8px 18px;border-radius:12px;font-size:13px;font-weight:800;border:1.5px solid var(--border);cursor:pointer;white-space:nowrap;background:var(--bg2);color:var(--text3);box-shadow:var(--card-shadow);transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.25s,color 0.25s,border-color 0.25s;font-family:var(--font); }
+  .day-tab:hover:not(.active) { transform:translateY(-4px) scale(1.06);box-shadow:var(--card-shadow-hover);color:var(--text); }
+  .day-tab.active { background:var(--accent);color:var(--accent-inv);border-color:var(--accent);transform:translateY(-3px) scale(1.07);box-shadow:0 8px 20px rgba(0,0,0,0.18); }
+  .schedule-list { display:flex;flex-direction:column;gap:6px; }
+  .period-row { display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;box-shadow:var(--card-shadow);cursor:default;transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,opacity 0.3s,background 0.3s; }
+  .period-row:hover:not(.past-row) { transform:translateX(6px) scale(1.015);box-shadow:var(--card-shadow-hover); }
+  .period-row.active-row { border-color:var(--border2);background:var(--bg3); }
+  .period-row.past-row { opacity:0.35; }
+  .period-num { width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--text3);flex-shrink:0;transition:background 0.3s,color 0.3s,border-color 0.3s; }
+  .period-num.active-num { background:var(--accent);color:var(--accent-inv);border-color:var(--accent);animation:popPulse 2s ease-in-out infinite; }
+  .period-info { flex:1;min-width:0; }
+  .period-class { font-size:14px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+  .period-teacher { font-size:12px;color:var(--text3);font-weight:600; }
+  .period-time { font-size:12px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-family:var(--mono);font-weight:500; }
+  .room-badge { font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:3px 8px;flex-shrink:0;font-weight:700;font-family:var(--mono); }
+  .dot { width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;animation:pulse 1.5s infinite; }
+  .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);z-index:100;align-items:flex-end;justify-content:center; }
+  .modal-overlay.open { display:flex;animation:fadeIn 0.2s ease; }
+  .modal { background:var(--bg2);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:24px 20px 40px;border-top:1.5px solid var(--border);box-shadow:0 -8px 40px rgba(0,0,0,0.15);animation:slideUpModal 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+  .modal-handle { width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 22px; }
+  .modal-title { font-size:20px;font-weight:900;color:var(--text);margin-bottom:5px; }
+  .modal-sub { font-size:13px;color:var(--text3);margin-bottom:20px;font-weight:600; }
+  .modal-elective-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+  .modal-elective-btn { padding:14px 12px;border-radius:14px;border:2px solid var(--border);background:var(--bg3);font-size:14px;font-weight:800;color:var(--text2);cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;font-family:var(--font);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.2s,border-color 0.2s,color 0.2s; }
+  .modal-elective-btn .ei { font-size:20px; }
+  .modal-elective-btn.selected { border-color:var(--accent);background:var(--accent);color:var(--accent-inv);transform:scale(1.04);box-shadow:0 4px 16px rgba(0,0,0,0.12); }
+  .modal-elective-btn:hover:not(.selected) { transform:translateY(-3px) scale(1.02);box-shadow:var(--card-shadow-hover);border-color:var(--border2); }
+  .modal-save { width:100%;margin-top:18px;padding:15px;border-radius:14px;background:var(--accent);color:var(--accent-inv);font-size:15px;font-weight:900;border:none;cursor:pointer;font-family:var(--font);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s;box-shadow:0 4px 14px rgba(0,0,0,0.12); }
+  .modal-save:hover { transform:translateY(-3px) scale(1.03);box-shadow:0 10px 28px rgba(0,0,0,0.2); }
+  .footer { margin-top:28px;padding-top:16px;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;gap:7px; }
+  .footer-text { font-size:12px;color:var(--text3);font-weight:700; }
+  .footer-code { font-size:13px;color:var(--text3);font-weight:700;font-family:var(--mono); }
+
+  /* ══════════════════════════════════════
+     ANIMATIONS
+  ══════════════════════════════════════ */
+  @keyframes logoBounce { 0%{opacity:0;transform:scale(0.4) translateY(30px)} 60%{opacity:1;transform:scale(1.15) translateY(-8px)} 80%{transform:scale(0.95) translateY(3px)} 100%{transform:scale(1) translateY(0)} }
+  @keyframes slideDown { 0%{opacity:0;transform:translateY(-30px) scale(0.95)} 60%{opacity:1;transform:translateY(6px) scale(1.02)} 80%{transform:translateY(-3px) scale(0.99)} 100%{transform:translateY(0) scale(1)} }
+  @keyframes slideUp { 0%{opacity:0;transform:translateY(30px) scale(0.95)} 60%{opacity:1;transform:translateY(-6px) scale(1.02)} 80%{transform:translateY(3px) scale(0.99)} 100%{transform:translateY(0) scale(1)} }
+  @keyframes bounceIn { 0%{opacity:0;transform:scale(0.6) translateY(20px)} 50%{opacity:1;transform:scale(1.08) translateY(-6px)} 70%{transform:scale(0.96) translateY(3px)} 85%{transform:scale(1.03) translateY(-2px)} 100%{transform:scale(1) translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes slideUpModal { 0%{transform:translateY(80px) scale(0.97);opacity:0} 60%{transform:translateY(-8px) scale(1.01);opacity:1} 80%{transform:translateY(4px) scale(0.995)} 100%{transform:translateY(0) scale(1)} }
+  @keyframes popPulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(0,0,0,0)} 50%{transform:scale(1.12);box-shadow:0 0 0 4px rgba(0,0,0,0.1)} }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
+  @keyframes btnPop { 0%{transform:scale(1)} 30%{transform:scale(0.88)} 65%{transform:scale(1.12)} 82%{transform:scale(0.97)} 100%{transform:scale(1)} }
 </style>
 </head>
 <body>
 
-<!-- Animated background -->
-<canvas id="bg-canvas" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-<div class="app">
-  <div class="header">
-    <div class="header-left">
-      <div class="school-name">P.S./I.S. 104 · Grade 6 · Class 601</div>
-      <div class="app-title">My Schedule</div>
+<!-- ══════════════════════════════════════
+     ENTRANCE SCREEN
+══════════════════════════════════════ -->
+<div class="screen" id="entrance-screen">
+  <div class="entrance-inner">
+    <div class="entrance-logo">📅</div>
+    <div class="entrance-title">My Schedule</div>
+    <div class="entrance-sub">P.S./I.S. 104 · Select your class to get started</div>
+
+    <div class="class-grid" id="class-grid">
+      <!-- injected by JS -->
     </div>
-    <div class="header-right">
-      <button class="theme-btn" id="theme-btn" title="Toggle dark mode" onclick="toggleTheme()">🌙</button>
-      <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+
+    <button class="entrance-continue" id="entrance-continue-btn" onclick="goToElective()">
+      Continue →
+    </button>
+
+    <div class="entrance-theme-row">
+      <button class="entrance-theme-btn" id="entrance-theme-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
     </div>
   </div>
+</div>
 
-  <div class="status-bar">
-    <div class="time-display" id="clock"></div>
-    <div class="status-right">
-      <div id="online-status"></div>
-      <div class="runtime-badge" id="runtime-badge">↑ 0s</div>
+<!-- ══════════════════════════════════════
+     ELECTIVE SCREEN
+══════════════════════════════════════ -->
+<div class="screen hidden" id="elective-screen">
+  <div class="elective-inner">
+    <button class="elective-back" onclick="goBack('elective-screen','entrance-screen')">← Back</button>
+    <div class="elective-emoji">🎯</div>
+    <div class="elective-title">Pick Your Elective</div>
+    <div class="elective-sub">This shows up as Period 3 on Mon – Thu</div>
+    <div class="elective-grid" id="elective-pick-grid">
+      <!-- injected -->
     </div>
+    <button class="elective-continue" onclick="goToLoading()">View My Schedule →</button>
   </div>
+</div>
 
-  <div id="current-section"></div>
-  <div id="next-section"></div>
-  <div class="day-tabs" id="day-tabs"></div>
-  <div class="schedule-list" id="schedule-list"></div>
+<!-- ══════════════════════════════════════
+     LOADING SCREEN
+══════════════════════════════════════ -->
+<div class="screen hidden" id="loading-screen">
+  <div class="loading-canvas-wrap">
+    <canvas id="balance-canvas" width="220" height="220"></canvas>
+  </div>
+  <div class="loading-label" id="loading-label">Setting things up…</div>
+  <div class="loading-bar-wrap"><div class="loading-bar-fill" id="loading-bar-fill"></div></div>
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+</div>
 
-  <div class="footer">
-    <span class="footer-code">&lt;/&gt;</span>
-    <span class="footer-text">Coded by Berk</span>
+<!-- ══════════════════════════════════════
+     MAIN SCHEDULE APP
+══════════════════════════════════════ -->
+<div id="app-screen" class="hidden gone">
+  <div class="app">
+    <div class="header">
+      <div class="header-left">
+        <div class="school-name" id="app-school-name">P.S./I.S. 104 · Grade 6 · Class 601</div>
+        <div class="app-title">My Schedule</div>
+      </div>
+      <div class="header-right">
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
+        <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="time-display" id="clock"></div>
+      <div class="status-right">
+        <div id="online-status"></div>
+        <div class="runtime-badge" id="runtime-badge">↑ 0s</div>
+      </div>
+    </div>
+    <div id="current-section"></div>
+    <div id="next-section"></div>
+    <div class="day-tabs" id="day-tabs"></div>
+    <div class="schedule-list" id="schedule-list"></div>
+    <div class="footer">
+      <span class="footer-code">&lt;/&gt;</span>
+      <span class="footer-text">Coded by Berk</span>
+    </div>
   </div>
 </div>
 
@@ -479,47 +383,308 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">Settings</div>
-    <div class="modal-sub">Choose your elective to personalize your schedule</div>
-    <div class="elective-grid" id="elective-grid"></div>
+    <div class="modal-sub">Change your elective</div>
+    <div class="modal-elective-grid" id="modal-elective-grid"></div>
     <button class="modal-save" onclick="saveSettings()">Save</button>
   </div>
 </div>
 
 <script>
+/* ════════════════════════════════════════
+   CONSTANTS & STATE
+════════════════════════════════════════ */
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
 const toMins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
 
-const ELECTIVES = [
-  { name: 'Math Olympiad Elective', icon: '🏅' },
-  { name: 'Science Elective',       icon: '🔬' },
-  { name: 'Nutrition Elective',     icon: '🥗' },
-  { name: 'Coding Elective',        icon: '💻' },
-  { name: 'Journalism Elective',    icon: '📰' },
+const CLASSES = [
+  { id:'601', label:'Class 601', grade:'Grade 6', available: true },
 ];
 
-let selectedElective = localStorage.getItem('selectedElective') || 'Math Olympiad Elective';
+const ELECTIVES = [
+  { name:'Math Olympiad Elective', icon:'🏅' },
+  { name:'Science Elective',       icon:'🔬' },
+  { name:'Nutrition Elective',     icon:'🥗' },
+  { name:'Coding Elective',        icon:'💻' },
+  { name:'Journalism Elective',    icon:'📰' },
+];
+
+const COLORS = ['#7F77DD','#1D9E75','#D85A30','#D4537E','#378ADD','#639922','#BA7517','#E24B4A'];
+
+let selectedClass   = localStorage.getItem('selectedClass')    || '601';
+let selectedElective= localStorage.getItem('selectedElective') || 'Math Olympiad Elective';
 let pendingElective = selectedElective;
-let isDark = localStorage.getItem('darkMode') === 'true';
+let isDark          = localStorage.getItem('darkMode') === 'true';
+let selectedDay     = null;
+const startTime     = Date.now();
 
 // Apply saved theme immediately
 document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
 
+/* ════════════════════════════════════════
+   THEME
+════════════════════════════════════════ */
 function toggleTheme() {
   isDark = !isDark;
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   localStorage.setItem('darkMode', isDark);
-  document.getElementById('theme-btn').textContent = isDark ? '☀️' : '🌙';
-  document.getElementById('theme-btn').style.transform = 'scale(1.3) rotate(360deg)';
-  setTimeout(() => document.getElementById('theme-btn').style.transform = '', 400);
+  ['theme-btn','entrance-theme-btn'].forEach(id => {
+    const b = document.getElementById(id); if (b) b.textContent = isDark ? '☀️' : '🌙';
+  });
+}
+function syncThemeIcons() {
+  ['theme-btn','entrance-theme-btn'].forEach(id => {
+    const b = document.getElementById(id); if (b) b.textContent = isDark ? '☀️' : '🌙';
+  });
 }
 
-// Set correct icon on load
-window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('theme-btn').textContent = isDark ? '☀️' : '🌙';
-});
+/* ════════════════════════════════════════
+   SCREEN NAVIGATION
+════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen, #app-screen').forEach(s => {
+    s.classList.add('hidden'); s.classList.remove('gone');
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.screen, #app-screen').forEach(s => {
+      if (s.id !== id) s.classList.add('gone');
+    });
+    const target = document.getElementById(id);
+    target.classList.remove('gone');
+    requestAnimationFrame(() => target.classList.remove('hidden'));
+  }, 500);
+}
 
+function goToElective() {
+  buildElectivePicker();
+  showScreen('elective-screen');
+}
+
+function goBack(fromId, toId) {
+  showScreen(toId);
+}
+
+function goToLoading() {
+  localStorage.setItem('selectedElective', selectedElective);
+  localStorage.setItem('selectedClass', selectedClass);
+  showScreen('loading-screen');
+  startLoadingAnim();
+}
+
+function goToApp() {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.add('hidden'); s.classList.add('gone'); });
+  const app = document.getElementById('app-screen');
+  app.classList.remove('gone');
+  requestAnimationFrame(() => app.classList.remove('hidden'));
+  syncThemeIcons();
+  render();
+  setInterval(render, 1000);
+  setTimeout(runIntro, 100);
+}
+
+/* ════════════════════════════════════════
+   ENTRANCE SCREEN BUILD
+════════════════════════════════════════ */
+function buildEntrance() {
+  const grid = document.getElementById('class-grid');
+  grid.innerHTML = CLASSES.map((c, i) => `
+    <button class="class-btn${c.available && c.id === selectedClass ? ' active-class' : ''}"
+      style="animation-delay:${0.35 + i*0.08}s"
+      onclick="pickClass('${c.id}')">
+      <div class="class-btn-label">${c.grade}</div>
+      <div>6-208</div>
+      <div class="class-btn-label" style="opacity:0.5;margin-top:2px">Homeroom 601</div>
+    </button>`).join('');
+  grid.insertAdjacentHTML('afterend', '<div style="width:100%;text-align:center;font-size:12px;font-weight:700;color:var(--text3);margin-top:6px;letter-spacing:0.04em;">More classes coming soon</div>');
+}
+
+function pickClass(id) {
+  selectedClass = id;
+  document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('active-class'));
+  document.querySelectorAll('.class-btn').forEach(b => {
+    if (b.textContent.includes(CLASSES.find(c=>c.id===id).label)) b.classList.add('active-class');
+  });
+}
+
+/* ════════════════════════════════════════
+   ELECTIVE PICKER BUILD
+════════════════════════════════════════ */
+function buildElectivePicker() {
+  const grid = document.getElementById('elective-pick-grid');
+  grid.innerHTML = ELECTIVES.map(e => `
+    <button class="elective-btn${e.name===selectedElective?' selected':''}" onclick="pickElectiveOnboard('${e.name}')">
+      <span class="ei">${e.icon}</span>${e.name}
+    </button>`).join('');
+}
+
+function pickElectiveOnboard(name) {
+  selectedElective = name;
+  document.querySelectorAll('#elective-pick-grid .elective-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent.trim().includes(name));
+  });
+}
+
+/* ════════════════════════════════════════
+   LOADING ANIMATION (balancing shapes)
+════════════════════════════════════════ */
+let loadingProgress = 0;
+let loadingRaf;
+
+const LOADING_MESSAGES = [
+  'Setting things up…',
+  'Loading your classes…',
+  'Syncing schedule…',
+  'Almost there…',
+  'Ready!',
+];
+
+function startLoadingAnim() {
+  loadingProgress = 0;
+  const bar = document.getElementById('loading-bar-fill');
+  const label = document.getElementById('loading-label');
+  bar.style.width = '0%';
+
+  // Animate progress
+  const totalMs = 2400;
+  const startT = performance.now();
+  function tick(now) {
+    const elapsed = now - startT;
+    loadingProgress = Math.min(100, (elapsed / totalMs) * 100);
+    bar.style.width = loadingProgress.toFixed(1) + '%';
+    const msgIdx = Math.min(LOADING_MESSAGES.length - 1, Math.floor((loadingProgress / 100) * LOADING_MESSAGES.length));
+    label.textContent = LOADING_MESSAGES[msgIdx];
+    if (loadingProgress < 100) { loadingRaf = requestAnimationFrame(tick); }
+    else { setTimeout(goToApp, 300); }
+  }
+  loadingRaf = requestAnimationFrame(tick);
+  startBalancingAnim();
+}
+
+function startBalancingAnim() {
+  const canvas = document.getElementById('balance-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 220, H = 220;
+  const cx = W/2, cy = H/2;
+
+  const SHAPE_COLORS_LIGHT = ['rgba(127,119,221,0.75)','rgba(29,158,117,0.7)','rgba(216,90,48,0.7)','rgba(212,83,126,0.7)','rgba(55,138,221,0.75)','rgba(100,153,34,0.7)','rgba(186,117,23,0.7)'];
+  const SHAPE_COLORS_DARK  = ['rgba(127,119,221,0.55)','rgba(29,158,117,0.5)','rgba(216,90,48,0.5)','rgba(212,83,126,0.5)','rgba(55,138,221,0.55)','rgba(100,153,34,0.5)','rgba(186,117,23,0.5)'];
+
+  function getShapeColors() { return isDark ? SHAPE_COLORS_DARK : SHAPE_COLORS_LIGHT; }
+
+  // Physics-lite: shapes orbiting with elastic bounce + slight gravity wobble
+  const shapes = [
+    { type:'circle',   size:28, angle:0,       r:72, speed:0.013,  phase:0,    colorIdx:0 },
+    { type:'square',   size:22, angle:2.09,    r:72, speed:-0.009, phase:1.1,  colorIdx:1 },
+    { type:'triangle', size:24, angle:4.19,    r:72, speed:0.011,  phase:2.2,  colorIdx:2 },
+    { type:'diamond',  size:20, angle:1.05,    r:48, speed:-0.017, phase:0.5,  colorIdx:3 },
+    { type:'circle',   size:16, angle:3.14,    r:48, speed:0.021,  phase:1.7,  colorIdx:4 },
+    { type:'square',   size:18, angle:5.24,    r:48, speed:-0.014, phase:3.0,  colorIdx:5 },
+    { type:'pentagon', size:26, angle:0.52,    r:88, speed:0.008,  phase:0.9,  colorIdx:6 },
+    { type:'triangle', size:14, angle:3.67,    r:88, speed:-0.012, phase:2.5,  colorIdx:0 },
+  ];
+
+  // Center core
+  const core = { rotation: 0, pulseT: 0 };
+
+  function drawShape(ctx, type, x, y, size, rotation, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    const r = size / 2;
+    switch(type) {
+      case 'circle':
+        ctx.arc(0, 0, r, 0, Math.PI*2); ctx.fill(); break;
+      case 'square':
+        ctx.roundRect(-r,-r,size,size, r*0.22); ctx.fill(); break;
+      case 'diamond':
+        ctx.moveTo(0,-r*1.1); ctx.lineTo(r*0.75,0); ctx.lineTo(0,r*1.1); ctx.lineTo(-r*0.75,0); ctx.closePath(); ctx.fill(); break;
+      case 'triangle':
+        ctx.moveTo(0,-r); ctx.lineTo(r*0.87,r*0.5); ctx.lineTo(-r*0.87,r*0.5); ctx.closePath(); ctx.fill(); break;
+      case 'pentagon':
+        for(let j=0;j<5;j++){const a=(j*Math.PI*2)/5-Math.PI/2; j===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);} ctx.closePath(); ctx.fill(); break;
+    }
+    ctx.restore();
+  }
+
+  let t = 0;
+  let rafId;
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    const cols = getShapeColors();
+    t += 0.016;
+
+    // Draw connecting lines first (faint)
+    ctx.save();
+    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
+    ctx.lineWidth = 1;
+    for (const s of shapes) {
+      const x = cx + Math.cos(s.angle) * s.r;
+      const y = cy + Math.sin(s.angle) * s.r + Math.sin(t*1.2 + s.phase)*6;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y); ctx.stroke();
+    }
+    ctx.restore();
+
+    // Draw shapes
+    for (const s of shapes) {
+      s.angle += s.speed;
+      const x = cx + Math.cos(s.angle) * s.r;
+      const y = cy + Math.sin(s.angle) * s.r + Math.sin(t*1.5 + s.phase) * 7;
+      const rotation = t * (s.speed > 0 ? 0.4 : -0.4);
+      drawShape(ctx, s.type, x, y, s.size, rotation, cols[s.colorIdx]);
+    }
+
+    // Center core pulsing circle
+    core.pulseT += 0.04;
+    const pulse = 1 + Math.sin(core.pulseT) * 0.12;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    ctx.beginPath(); ctx.arc(0, 0, 18 * pulse, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(26,25,22,0.7)';
+    ctx.font = 'bold 18px Nunito, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('📅', 0, 0);
+    ctx.restore();
+
+    rafId = requestAnimationFrame(frame);
+  }
+  frame();
+
+  // Stop when we leave loading screen
+  const obs = new MutationObserver(() => {
+    const ls = document.getElementById('loading-screen');
+    if (ls.classList.contains('hidden') || ls.classList.contains('gone')) {
+      cancelAnimationFrame(rafId); obs.disconnect();
+    }
+  });
+  obs.observe(document.getElementById('loading-screen'), { attributes: true, attributeFilter: ['class'] });
+}
+
+/* ════════════════════════════════════════
+   BACKGROUND CANVAS
+════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  const LIGHT_COLORS = ['rgba(255,190,80,0.18)','rgba(120,180,255,0.18)','rgba(200,130,255,0.15)','rgba(80,210,170,0.16)','rgba(255,120,140,0.14)','rgba(100,210,100,0.15)'];
+  const DARK_COLORS  = ['rgba(255,160,50,0.13)','rgba(80,140,255,0.12)','rgba(180,70,255,0.1)','rgba(40,200,150,0.11)','rgba(255,80,110,0.1)','rgba(60,200,80,0.11)'];
+  const TYPES = ['circle','triangle','square','diamond','pentagon'];
+  let W, H, shapes;
+  function getColors() { return document.documentElement.getAttribute('data-theme')==='dark' ? DARK_COLORS : LIGHT_COLORS; }
+  function rb(a,b){return a+Math.random()*(b-a);}
+  function makeShape(i){const size=rb(28,72);const spd=rb(0.4,1.1);const ang=Math.random()*Math.PI*2;return{x:rb(size,W-size),y:rb(size,H-size),vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,size,type:TYPES[i%TYPES.length],colorIdx:i%LIGHT_COLORS.length,rotation:Math.random()*Math.PI*2,rotSpeed:rb(-0.008,0.008),strokeWidth:rb(1.5,3)};}
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;shapes=Array.from({length:9},(_,i)=>makeShape(i));}
+  function drawShape(s,color){ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.rotation);ctx.fillStyle=color;ctx.beginPath();const r=s.size/2;switch(s.type){case'circle':ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();break;case'square':ctx.roundRect(-r,-r,s.size,s.size,r*0.22);ctx.fill();break;case'diamond':ctx.moveTo(0,-r*1.1);ctx.lineTo(r*0.75,0);ctx.lineTo(0,r*1.1);ctx.lineTo(-r*0.75,0);ctx.closePath();ctx.fill();break;case'triangle':ctx.moveTo(0,-r);ctx.lineTo(r*0.87,r*0.5);ctx.lineTo(-r*0.87,r*0.5);ctx.closePath();ctx.fill();break;case'pentagon':{for(let j=0;j<5;j++){const a=(j*Math.PI*2)/5-Math.PI/2;j===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.fill();break;}}ctx.restore();}
+  function tick(){ctx.clearRect(0,0,W,H);const colors=getColors();for(const s of shapes){s.x+=s.vx;s.y+=s.vy;s.rotation+=s.rotSpeed;const half=s.size/2;if(s.x-half<0){s.x=half;s.vx=Math.abs(s.vx);}if(s.x+half>W){s.x=W-half;s.vx=-Math.abs(s.vx);}if(s.y-half<0){s.y=half;s.vy=Math.abs(s.vy);}if(s.y+half>H){s.y=H-half;s.vy=-Math.abs(s.vy);}drawShape(s,colors[s.colorIdx]);}requestAnimationFrame(tick);}
+  window.addEventListener('resize',resize);resize();tick();
+})();
+
+/* ════════════════════════════════════════
+   SCHEDULE DATA
+════════════════════════════════════════ */
 const baseSchedule = {
-  Monday: [
+  Monday:[
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
     {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
     {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
@@ -529,7 +694,7 @@ const baseSchedule = {
     {p:7,name:'Physical Education',teacher:'Dibbs',room:'GYM',start:'12:50',end:'13:35'},
     {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
   ],
-  Tuesday: [
+  Tuesday:[
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
     {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
     {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
@@ -539,7 +704,7 @@ const baseSchedule = {
     {p:7,name:'Physical Education',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
     {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
   ],
-  Wednesday: [
+  Wednesday:[
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
     {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
     {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
@@ -549,7 +714,7 @@ const baseSchedule = {
     {p:7,name:'Physical Education',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
     {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
   ],
-  Thursday: [
+  Thursday:[
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
     {p:2,name:'Health 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
     {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
@@ -559,7 +724,7 @@ const baseSchedule = {
     {p:7,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
     {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
   ],
-  Friday: [
+  Friday:[
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
     {p:2,name:'Health 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
     {p:3,name:'Spanish 6',teacher:'Scandole',room:'208',start:'9:50',end:'10:35'},
@@ -574,363 +739,115 @@ const baseSchedule = {
 function getSchedule() {
   const out = {};
   for (const [day, periods] of Object.entries(baseSchedule)) {
-    out[day] = periods.map(p => ({
-      ...p,
-      name: p.name === '__ELECTIVE__' ? selectedElective : p.name,
-    }));
+    out[day] = periods.map(p => ({ ...p, name: p.name==='__ELECTIVE__' ? selectedElective : p.name }));
   }
   return out;
 }
 
-const COLORS = ['#7F77DD','#1D9E75','#D85A30','#D4537E','#378ADD','#639922','#BA7517','#E24B4A'];
-let selectedDay = null;
-const startTime = Date.now();
+/* ════════════════════════════════════════
+   SCHEDULE RENDER
+════════════════════════════════════════ */
+let _lastOnline=null,_lastViewDay=null,_lastCurPeriod=null,_lastMinute=-1;
+function getNYTime(){return new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));}
+function getDayName(d){return['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];}
+function fmt12(t){const[h,m]=t.split(':').map(Number);const ampm=h>=12?'PM':'AM';const h12=h%12||12;return`${h12}:${String(m).padStart(2,'0')} ${ampm}`;}
+function fmtCountdown(secs){if(secs<=0)return'0:00';const m=Math.floor(secs/60);const s=secs%60;return`${m}:${String(s).padStart(2,'0')}`;}
+function fmtRuntime(ms){const s=Math.floor(ms/1000);if(s<60)return`↑ ${s}s`;const m=Math.floor(s/60);const rs=s%60;if(m<60)return`↑ ${m}m ${rs}s`;const h=Math.floor(m/60);const rm=m%60;return`↑ ${h}h ${rm}m`;}
+function getCurrentPeriod(day,now,schedule){const nowMins=now.getHours()*60+now.getMinutes();if(!schedule[day])return null;for(const p of schedule[day]){if(nowMins>=toMins(p.start)&&nowMins<toMins(p.end))return p;}return null;}
+function getNextPeriod(day,now,schedule){const nowMins=now.getHours()*60+now.getMinutes();if(!schedule[day])return null;for(const p of schedule[day]){if(toMins(p.start)>nowMins)return p;}return null;}
+function setTextIfChanged(el,val){if(el&&el.textContent!==val)el.textContent=val;}
+function updateOnlineStatus(){const online=navigator.onLine;if(online===_lastOnline)return;_lastOnline=online;const el=document.getElementById('online-status');if(online){el.innerHTML=`<div class="online-indicator"><div class="online-dot"></div>Online</div>`;}else{el.innerHTML=`<div class="offline-indicator"><div class="offline-dot"></div>Offline</div>`;}}
 
-function getNYTime() { return new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'})); }
-function getDayName(d) { return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]; }
-function fmt12(t) { const [h,m]=t.split(':').map(Number); const ampm=h>=12?'PM':'AM'; const h12=h%12||12; return `${h12}:${String(m).padStart(2,'0')} ${ampm}`; }
-function fmtCountdown(secs) { if(secs<=0)return'0:00'; const m=Math.floor(secs/60); const s=secs%60; return `${m}:${String(s).padStart(2,'0')}`; }
-function fmtRuntime(ms) {
-  const s = Math.floor(ms/1000);
-  if (s < 60) return `↑ ${s}s`;
-  const m = Math.floor(s/60); const rs = s%60;
-  if (m < 60) return `↑ ${m}m ${rs}s`;
-  const h = Math.floor(m/60); const rm = m%60;
-  return `↑ ${h}h ${rm}m`;
-}
-function getCurrentPeriod(day,now,schedule) { const nowMins=now.getHours()*60+now.getMinutes(); if(!schedule[day])return null; for(const p of schedule[day]){if(nowMins>=toMins(p.start)&&nowMins<toMins(p.end))return p;} return null; }
-function getNextPeriod(day,now,schedule) { const nowMins=now.getHours()*60+now.getMinutes(); if(!schedule[day])return null; for(const p of schedule[day]){if(toMins(p.start)>nowMins)return p;} return null; }
-
-// ── Track last-rendered state to avoid unnecessary DOM writes ──
-let _lastOnline = null;
-let _lastViewDay = null;
-let _lastCurPeriod = null;
-let _lastMinute = -1;
-
-function setTextIfChanged(el, val) {
-  if (el && el.textContent !== val) el.textContent = val;
-}
-
-function updateOnlineStatus() {
-  const online = navigator.onLine;
-  if (online === _lastOnline) return;
-  _lastOnline = online;
-  const el = document.getElementById('online-status');
-  if (online) {
-    el.innerHTML = `<div class="online-indicator"><div class="online-dot"></div>Online</div>`;
-  } else {
-    el.innerHTML = `<div class="offline-indicator"><div class="offline-dot"></div>Offline</div>`;
+function fullRender(schedule,now,viewDay,realDay,isSchoolDay){
+  const dayPeriods=schedule[viewDay]||[];
+  const isToday=viewDay===realDay&&isSchoolDay;
+  const cur=isToday?getCurrentPeriod(viewDay,now,schedule):null;
+  const nxt=isToday?getNextPeriod(viewDay,now,schedule):null;
+  const nowMins=now.getHours()*60+now.getMinutes();
+  const tabs=document.getElementById('day-tabs');
+  tabs.innerHTML=DAYS.map(d=>`<div class="day-tab${viewDay===d?' active':''}" onclick="selectDay('${d}')">${d.slice(0,3)}</div>`).join('');
+  const curSec=document.getElementById('current-section');
+  if(!isToday){curSec.innerHTML='';}
+  else if(cur){
+    const color=COLORS[(cur.p-1)%COLORS.length];
+    const endMins=toMins(cur.end);const startMins=toMins(cur.start);const totalMins=endMins-startMins;
+    const elapsed=nowMins+now.getSeconds()/60-startMins;const pct=Math.min(100,Math.max(0,(elapsed/totalMins)*100));
+    const secsLeft=Math.max(0,(endMins-nowMins-now.getSeconds()/60)*60);
+    curSec.innerHTML=`<div class="current-card"><div class="accent" style="background:${color}"></div><div class="inner"><div class="period-label"><span class="dot"></span>Period ${cur.p} · now</div><div class="class-name">${cur.name}</div><div class="teacher">${cur.teacher} · Room ${cur.room}</div><div class="time-row"><div><div class="countdown" id="countdown-val">${fmtCountdown(Math.round(secsLeft))}</div><div class="countdown-label">until end</div></div><div class="time-badge">${fmt12(cur.start)} – ${fmt12(cur.end)}</div></div><div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:${pct.toFixed(2)}%;background:${color}"></div></div></div></div>`;
+  }else{
+    const firstStart=toMins(dayPeriods[0]?.start||'8:20');
+    curSec.innerHTML=`<div class="current-card"><div style="padding:4px 0"><div class="period-label">${nowMins<firstStart?"school hasn't started yet":"school's done"}</div><div class="class-name">${nowMins<firstStart?'First period at '+fmt12(dayPeriods[0]?.start||'8:20'):'See you tomorrow!'}</div></div></div>`;
   }
-}
-
-// Full structural rebuild — only called when day or active period changes
-function fullRender(schedule, now, viewDay, realDay, isSchoolDay) {
-  const dayPeriods = schedule[viewDay] || [];
-  const isToday = viewDay === realDay && isSchoolDay;
-  const cur = isToday ? getCurrentPeriod(viewDay, now, schedule) : null;
-  const nxt = isToday ? getNextPeriod(viewDay, now, schedule) : null;
-  const nowMins = now.getHours()*60 + now.getMinutes();
-
-  // Tabs
-  const tabs = document.getElementById('day-tabs');
-  tabs.innerHTML = DAYS.map(d =>
-    `<div class="day-tab${viewDay===d?' active':''}" onclick="selectDay('${d}')">${d.slice(0,3)}</div>`
-  ).join('');
-
-  // Current card
-  const curSec = document.getElementById('current-section');
-  if (!isToday) {
-    curSec.innerHTML = '';
-  } else if (cur) {
-    const color = COLORS[(cur.p-1) % COLORS.length];
-    const endMins = toMins(cur.end);
-    const startMins = toMins(cur.start);
-    const totalMins = endMins - startMins;
-    const elapsed = nowMins + now.getSeconds()/60 - startMins;
-    const pct = Math.min(100, Math.max(0, (elapsed/totalMins)*100));
-    const secsLeft = Math.max(0, (endMins - nowMins - now.getSeconds()/60) * 60);
-    curSec.innerHTML = `
-      <div class="current-card">
-        <div class="accent" style="background:${color}"></div>
-        <div class="inner">
-          <div class="period-label"><span class="dot"></span>Period ${cur.p} · now</div>
-          <div class="class-name">${cur.name}</div>
-          <div class="teacher">${cur.teacher} · Room ${cur.room}</div>
-          <div class="time-row">
-            <div>
-              <div class="countdown" id="countdown-val">${fmtCountdown(Math.round(secsLeft))}</div>
-              <div class="countdown-label">until end</div>
-            </div>
-            <div class="time-badge">${fmt12(cur.start)} – ${fmt12(cur.end)}</div>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill" style="width:${pct.toFixed(2)}%;background:${color}"></div>
-          </div>
-        </div>
-      </div>`;
-  } else {
-    const firstStart = toMins(dayPeriods[0]?.start || '8:20');
-    curSec.innerHTML = `<div class="current-card"><div style="padding:4px 0">
-      <div class="period-label">${nowMins < firstStart ? "school hasn't started yet" : "school's done"}</div>
-      <div class="class-name">${nowMins < firstStart ? 'First period at ' + fmt12(dayPeriods[0]?.start||'8:20') : 'See you tomorrow!'}</div>
-    </div></div>`;
-  }
-
-  // Next card
-  const nxtSec = document.getElementById('next-section');
-  if (isToday && nxt) {
-    nxtSec.innerHTML = `<div class="next-card"><div><div class="next-label">up next · Period ${nxt.p}</div><div class="next-class">${nxt.name}</div></div><div class="next-time">${fmt12(nxt.start)}</div></div>`;
-  } else {
-    nxtSec.innerHTML = '';
-  }
-
-  // Schedule list
-  const list = document.getElementById('schedule-list');
-  list.innerHTML = dayPeriods.map(p => {
-    const isPast = isToday && toMins(p.end) <= nowMins;
-    const isActive = isToday && cur && cur.p === p.p;
-    return `<div class="period-row${isActive?' active-row':isPast?' past-row':''}">
-      <div class="period-num${isActive?' active-num':''}">${p.p}</div>
-      <div class="period-info">
-        <div class="period-class">${p.name}</div>
-        <div class="period-teacher">${p.teacher}</div>
-      </div>
-      <div class="room-badge">Rm ${p.room}</div>
-      <div class="period-time">${fmt12(p.start)}</div>
-      ${isActive ? '<div class="dot"></div>' : ''}
-    </div>`;
+  const nxtSec=document.getElementById('next-section');
+  if(isToday&&nxt){nxtSec.innerHTML=`<div class="next-card"><div><div class="next-label">up next · Period ${nxt.p}</div><div class="next-class">${nxt.name}</div></div><div class="next-time">${fmt12(nxt.start)}</div></div>`;}
+  else{nxtSec.innerHTML='';}
+  const list=document.getElementById('schedule-list');
+  list.innerHTML=dayPeriods.map(p=>{
+    const isPast=isToday&&toMins(p.end)<=nowMins;
+    const isActive=isToday&&cur&&cur.p===p.p;
+    return`<div class="period-row${isActive?' active-row':isPast?' past-row':''}"><div class="period-num${isActive?' active-num':''}">${p.p}</div><div class="period-info"><div class="period-class">${p.name}</div><div class="period-teacher">${p.teacher}</div></div><div class="room-badge">Rm ${p.room}</div><div class="period-time">${fmt12(p.start)}</div>${isActive?'<div class="dot"></div>':''}</div>`;
   }).join('');
 }
 
-function render() {
-  const schedule = getSchedule();
-  const now = getNYTime();
-  const realDay = getDayName(now);
-  const isSchoolDay = DAYS.includes(realDay);
-  const viewDay = selectedDay || (isSchoolDay ? realDay : 'Monday');
-  const cur = (viewDay === realDay && isSchoolDay) ? getCurrentPeriod(viewDay, now, schedule) : null;
-  const curKey = cur ? cur.p : null;
-  const minute = now.getHours() * 60 + now.getMinutes();
-
-  // Always update fast-changing text nodes directly
-  const hh = String(now.getHours()).padStart(2,'0');
-  const mm = String(now.getMinutes()).padStart(2,'0');
-  setTextIfChanged(document.getElementById('clock'), `${fmt12(hh+':'+mm)} · ${realDay}`);
-  setTextIfChanged(document.getElementById('runtime-badge'), fmtRuntime(Date.now() - startTime));
+function render(){
+  const schedule=getSchedule();const now=getNYTime();const realDay=getDayName(now);
+  const isSchoolDay=DAYS.includes(realDay);const viewDay=selectedDay||(isSchoolDay?realDay:'Monday');
+  const cur=(viewDay===realDay&&isSchoolDay)?getCurrentPeriod(viewDay,now,schedule):null;
+  const curKey=cur?cur.p:null;const minute=now.getHours()*60+now.getMinutes();
+  const hh=String(now.getHours()).padStart(2,'0');const mm=String(now.getMinutes()).padStart(2,'0');
+  setTextIfChanged(document.getElementById('clock'),`${fmt12(hh+':'+mm)} · ${realDay}`);
+  setTextIfChanged(document.getElementById('runtime-badge'),fmtRuntime(Date.now()-startTime));
   updateOnlineStatus();
-
-  // Only patch countdown + progress bar in place (no DOM rebuild)
-  if (cur) {
-    const nowMins = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60;
-    const endMins = toMins(cur.end);
-    const startMins = toMins(cur.start);
-    const secsLeft = Math.max(0, (endMins - nowMins) * 60);
-    const pct = Math.min(100, Math.max(0, ((nowMins - startMins) / (endMins - startMins)) * 100));
-    const cdEl = document.getElementById('countdown-val');
-    const pfEl = document.getElementById('progress-fill');
-    if (cdEl) setTextIfChanged(cdEl, fmtCountdown(Math.round(secsLeft)));
-    if (pfEl) pfEl.style.width = pct.toFixed(2) + '%';
+  if(cur){
+    const nowMins=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+    const endMins=toMins(cur.end);const startMins=toMins(cur.start);
+    const secsLeft=Math.max(0,(endMins-nowMins)*60);
+    const pct=Math.min(100,Math.max(0,((nowMins-startMins)/(endMins-startMins))*100));
+    const cdEl=document.getElementById('countdown-val');const pfEl=document.getElementById('progress-fill');
+    if(cdEl)setTextIfChanged(cdEl,fmtCountdown(Math.round(secsLeft)));if(pfEl)pfEl.style.width=pct.toFixed(2)+'%';
   }
-
-  // Full rebuild only when: day changed, active period changed, or minute ticked (for past-row states)
-  const needsFull = viewDay !== _lastViewDay || curKey !== _lastCurPeriod || minute !== _lastMinute;
-  if (needsFull) {
-    _lastViewDay = viewDay;
-    _lastCurPeriod = curKey;
-    _lastMinute = minute;
-    fullRender(schedule, now, viewDay, realDay, isSchoolDay);
-  }
+  const needsFull=viewDay!==_lastViewDay||curKey!==_lastCurPeriod||minute!==_lastMinute;
+  if(needsFull){_lastViewDay=viewDay;_lastCurPeriod=curKey;_lastMinute=minute;fullRender(schedule,now,viewDay,realDay,isSchoolDay);}
 }
 
-function openSettings() {
-  pendingElective = selectedElective;
-  const grid = document.getElementById('elective-grid');
-  grid.innerHTML = ELECTIVES.map(e =>
-    `<button class="elective-btn${e.name===pendingElective?' selected':''}" onclick="pickElective('${e.name}')">
-      <span class="elective-icon">${e.icon}</span>${e.name}
-    </button>`
-  ).join('');
+/* ════════════════════════════════════════
+   SETTINGS MODAL
+════════════════════════════════════════ */
+function openSettings(){
+  pendingElective=selectedElective;
+  document.getElementById('modal-elective-grid').innerHTML=ELECTIVES.map(e=>`<button class="modal-elective-btn${e.name===pendingElective?' selected':''}" onclick="pickModalElective('${e.name}')"><span class="ei">${e.icon}</span>${e.name}</button>`).join('');
   document.getElementById('modal-overlay').classList.add('open');
 }
+function pickModalElective(name){pendingElective=name;document.querySelectorAll('.modal-elective-btn').forEach(b=>{b.classList.toggle('selected',b.textContent.trim().includes(name));});}
+function saveSettings(){selectedElective=pendingElective;localStorage.setItem('selectedElective',selectedElective);document.getElementById('modal-overlay').classList.remove('open');_lastViewDay=null;render();}
+function overlayClick(e){if(e.target===document.getElementById('modal-overlay'))document.getElementById('modal-overlay').classList.remove('open');}
+window.selectDay=function(d){selectedDay=d;_lastViewDay=null;render();};
 
-function pickElective(name) {
-  pendingElective = name;
-  document.querySelectorAll('.elective-btn').forEach(btn => {
-    btn.classList.toggle('selected', btn.textContent.trim().includes(name));
-  });
+/* ════════════════════════════════════════
+   INTRO ANIMATION (after loading)
+════════════════════════════════════════ */
+function runIntro(){
+  const els=[
+    {el:document.querySelector('.header'),     anim:'slideDown 0.7s cubic-bezier(0.34,1.56,0.64,1) both'},
+    {el:document.querySelector('.status-bar'), anim:'slideDown 0.7s 0.08s cubic-bezier(0.34,1.56,0.64,1) both'},
+    {el:document.getElementById('current-section'),anim:'bounceIn 0.75s 0.15s cubic-bezier(0.34,1.56,0.64,1) both'},
+    {el:document.getElementById('next-section'),   anim:'bounceIn 0.75s 0.22s cubic-bezier(0.34,1.56,0.64,1) both'},
+    {el:document.getElementById('day-tabs'),       anim:'slideUp 0.7s 0.28s cubic-bezier(0.34,1.56,0.64,1) both'},
+  ];
+  els.forEach(({el,anim})=>{if(!el)return;el.style.animation=anim;el.addEventListener('animationend',()=>el.style.animation='',{once:true});});
+  document.querySelectorAll('.period-row').forEach((row,i)=>{const delay=0.35+i*0.07;row.style.animation=`bounceIn 0.65s ${delay}s cubic-bezier(0.34,1.56,0.64,1) both`;row.addEventListener('animationend',()=>row.style.animation='',{once:true});});
 }
 
-function saveSettings() {
-  selectedElective = pendingElective;
-  localStorage.setItem('selectedElective', selectedElective);
-  document.getElementById('modal-overlay').classList.remove('open');
-  _lastViewDay = null; // force full rebuild
-  render();
-}
-
-function overlayClick(e) {
-  if (e.target === document.getElementById('modal-overlay')) {
-    document.getElementById('modal-overlay').classList.remove('open');
-  }
-}
-
-window.selectDay = function(d) { selectedDay = d; _lastViewDay = null; render(); };
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
-render();
-setInterval(render, 1000);
-
-// ── ONE-SHOT INTRO (runs only once on page load) ──
-function runIntro() {
-  const els = [
-    { el: document.querySelector('.header'),     anim: 'slideDown 0.7s cubic-bezier(0.34,1.56,0.64,1) both' },
-    { el: document.querySelector('.status-bar'), anim: 'slideDown 0.7s 0.08s cubic-bezier(0.34,1.56,0.64,1) both' },
-    { el: document.getElementById('current-section'), anim: 'bounceIn 0.75s 0.15s cubic-bezier(0.34,1.56,0.64,1) both' },
-    { el: document.getElementById('next-section'),    anim: 'bounceIn 0.75s 0.22s cubic-bezier(0.34,1.56,0.64,1) both' },
-    { el: document.getElementById('day-tabs'),        anim: 'slideUp 0.7s 0.28s cubic-bezier(0.34,1.56,0.64,1) both' },
-  ];
-  els.forEach(({el, anim}) => {
-    if (!el) return;
-    el.style.animation = anim;
-    el.addEventListener('animationend', () => el.style.animation = '', { once: true });
-  });
-
-  // Stagger period rows
-  const rows = document.querySelectorAll('.period-row');
-  rows.forEach((row, i) => {
-    const delay = 0.35 + i * 0.07;
-    row.style.animation = `bounceIn 0.65s ${delay}s cubic-bezier(0.34,1.56,0.64,1) both`;
-    row.addEventListener('animationend', () => row.style.animation = '', { once: true });
-  });
-}
-// ── BOUNCING GEOMETRIC SHAPES ──
-(function() {
-  const canvas = document.getElementById('bg-canvas');
-  const ctx = canvas.getContext('2d');
-
-  const LIGHT_COLORS = [
-    'rgba(255,190,80,0.18)',
-    'rgba(120,180,255,0.18)',
-    'rgba(200,130,255,0.15)',
-    'rgba(80,210,170,0.16)',
-    'rgba(255,120,140,0.14)',
-    'rgba(100,210,100,0.15)',
-  ];
-  const DARK_COLORS = [
-    'rgba(255,160,50,0.13)',
-    'rgba(80,140,255,0.12)',
-    'rgba(180,70,255,0.1)',
-    'rgba(40,200,150,0.11)',
-    'rgba(255,80,110,0.1)',
-    'rgba(60,200,80,0.11)',
-  ];
-
-  const TYPES = ['circle', 'triangle', 'square', 'diamond', 'pentagon'];
-
-  let W, H, shapes;
-
-  function getColors() {
-    return document.documentElement.getAttribute('data-theme') === 'dark' ? DARK_COLORS : LIGHT_COLORS;
-  }
-
-  function randomBetween(a, b) { return a + Math.random() * (b - a); }
-
-  function makeShape(i) {
-    const size = randomBetween(28, 72);
-    const speed = randomBetween(0.4, 1.1);
-    const angle = Math.random() * Math.PI * 2;
-    return {
-      x: randomBetween(size, W - size),
-      y: randomBetween(size, H - size),
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      size,
-      type: TYPES[i % TYPES.length],
-      colorIdx: i % LIGHT_COLORS.length,
-      rotation: Math.random() * Math.PI * 2,
-      rotSpeed: randomBetween(-0.008, 0.008),
-      strokeWidth: randomBetween(1.5, 3),
-    };
-  }
-
-  function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-    shapes = Array.from({length: 9}, (_, i) => makeShape(i));
-  }
-
-  function drawShape(s, color) {
-    ctx.save();
-    ctx.translate(s.x, s.y);
-    ctx.rotate(s.rotation);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = s.strokeWidth;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-
-    const r = s.size / 2;
-    switch (s.type) {
-      case 'circle':
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.fill();
-        break;
-      case 'square':
-        ctx.roundRect(-r, -r, s.size, s.size, r * 0.22);
-        ctx.fill();
-        break;
-      case 'diamond':
-        ctx.moveTo(0, -r * 1.1);
-        ctx.lineTo(r * 0.75, 0);
-        ctx.lineTo(0, r * 1.1);
-        ctx.lineTo(-r * 0.75, 0);
-        ctx.closePath();
-        ctx.fill();
-        break;
-      case 'triangle':
-        ctx.moveTo(0, -r);
-        ctx.lineTo(r * 0.87, r * 0.5);
-        ctx.lineTo(-r * 0.87, r * 0.5);
-        ctx.closePath();
-        ctx.fill();
-        break;
-      case 'pentagon': {
-        for (let j = 0; j < 5; j++) {
-          const a = (j * Math.PI * 2) / 5 - Math.PI / 2;
-          j === 0 ? ctx.moveTo(Math.cos(a)*r, Math.sin(a)*r) : ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r);
-        }
-        ctx.closePath();
-        ctx.fill();
-        break;
-      }
-    }
-    ctx.restore();
-  }
-
-  function tick() {
-    ctx.clearRect(0, 0, W, H);
-    const colors = getColors();
-
-    for (const s of shapes) {
-      s.x += s.vx;
-      s.y += s.vy;
-      s.rotation += s.rotSpeed;
-
-      const half = s.size / 2;
-      if (s.x - half < 0)  { s.x = half;     s.vx = Math.abs(s.vx); }
-      if (s.x + half > W)  { s.x = W - half; s.vx = -Math.abs(s.vx); }
-      if (s.y - half < 0)  { s.y = half;     s.vy = Math.abs(s.vy); }
-      if (s.y + half > H)  { s.y = H - half; s.vy = -Math.abs(s.vy); }
-
-      drawShape(s, colors[s.colorIdx]);
-    }
-    requestAnimationFrame(tick);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  tick();
-})();
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  syncThemeIcons();
+  buildEntrance();
+});
 </script>
 </body>
 </html>
