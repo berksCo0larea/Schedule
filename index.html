@@ -124,6 +124,46 @@
     transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
   }
   .entrance-theme-btn:hover { transform: scale(1.2) rotate(20deg); }
+  .whats-new-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg2); border: 1.5px solid var(--border2);
+    border-radius: 999px; padding: 6px 14px 6px 10px;
+    font-size: 12px; font-weight: 800; color: var(--text2);
+    cursor: pointer; font-family: var(--font);
+    box-shadow: var(--card-shadow);
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+    animation: fadeIn 0.5s ease both 0.65s;
+    margin-bottom: 18px;
+  }
+  .whats-new-btn:hover { transform: scale(1.05); box-shadow: var(--card-shadow-hover); }
+  .whats-new-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #1D9E75;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:0.6} }
+
+  /* What's New Modal */
+  .wn-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .wn-overlay.open { opacity: 1; pointer-events: all; }
+  .wn-modal {
+    background: var(--bg2); border-radius: 28px 28px 0 0;
+    padding: 12px 24px 40px; width: 100%; max-width: 480px;
+    transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    max-height: 80vh; overflow-y: auto;
+  }
+  .wn-overlay.open .wn-modal { transform: translateY(0); }
+  .wn-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 99px; margin: 0 auto 20px; }
+  .wn-title { font-size: 20px; font-weight: 900; margin-bottom: 4px; }
+  .wn-subtitle { font-size: 12px; color: var(--text3); font-weight: 700; margin-bottom: 20px; }
+  .wn-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px; }
+  .wn-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+  .wn-item-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+  .wn-item-desc { font-size: 13px; color: var(--text2); line-height: 1.5; font-weight: 600; }
 
   /* ══════════════════════════════════════
      ELECTIVE SCREEN
@@ -299,6 +339,11 @@
     <div class="entrance-title">My Schedule</div>
     <div class="entrance-sub">P.S./I.S. 104 · Select your class to get started</div>
 
+    <button class="whats-new-btn" onclick="openWhatsNew()">
+      <div class="whats-new-dot"></div>
+      What's new
+    </button>
+
     <div class="class-grid" id="class-grid">
       <!-- injected by JS -->
     </div>
@@ -306,6 +351,11 @@
     <button class="entrance-continue" id="entrance-continue-btn" onclick="goToElective()">
       Continue →
     </button>
+
+    <div id="summer-mini" style="display:none;text-align:center;margin-top:4px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.07em;text-transform:uppercase;">☀️ Summer break in</div>
+      <div id="summer-mini-val" style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--text2);margin-top:2px;">--d --h --m --s</div>
+    </div>
 
     <div class="entrance-theme-row">
       <button class="entrance-theme-btn" id="entrance-theme-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
@@ -371,9 +421,95 @@
     <div id="next-section"></div>
     <div class="day-tabs" id="day-tabs"></div>
     <div class="schedule-list" id="schedule-list"></div>
+    <div id="app-summer-countdown" style="text-align:center;padding:14px 16px 4px;display:none;">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">☀️ Summer break in</div>
+      <div id="app-summer-val" style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text2);letter-spacing:0.03em;">--d --h --m --s</div>
+    </div>
     <div class="footer">
       <span class="footer-code">&lt;/&gt;</span>
       <span class="footer-text">Coded by Berk</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SUMMER BREAK SCREEN
+══════════════════════════════════════ -->
+<div class="screen hidden gone" id="summer-screen">
+  <div class="entrance-inner" style="gap:18px;text-align:center;">
+    <div style="font-size:64px;line-height:1;">☀️</div>
+    <div class="entrance-title" style="font-size:28px;">Summer Break!</div>
+    <div class="entrance-sub">School's out — enjoy every second 🎉</div>
+    <div style="background:var(--bg2);border-radius:20px;padding:24px 32px;box-shadow:var(--card-shadow);margin-top:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">7th grade starts in</div>
+      <div id="summer-countdown" style="font-family:var(--mono);font-size:32px;font-weight:700;color:var(--text);letter-spacing:0.04em;">--d --h --m --s</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px;">September 10</div>
+    </div>
+    <div class="entrance-theme-row" style="margin-top:4px;">
+      <button class="entrance-theme-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     7TH GRADE COMING SOON SCREEN
+══════════════════════════════════════ -->
+<div class="screen hidden gone" id="comingsoon-screen">
+  <div class="entrance-inner" style="gap:18px;text-align:center;">
+    <div style="font-size:64px;line-height:1;">🚀</div>
+    <div class="entrance-title" style="font-size:28px;">7th Grade</div>
+    <div class="entrance-sub">Schedule coming soon — check back closer to the first day!</div>
+    <div style="background:var(--bg2);border-radius:20px;padding:20px 28px;box-shadow:var(--card-shadow);margin-top:8px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text3);">In Development</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:6px;">New schedule will be added before school starts</div>
+    </div>
+    <div class="entrance-theme-row" style="margin-top:4px;">
+      <button class="entrance-theme-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+    </div>
+  </div>
+</div>
+
+<!-- WHAT'S NEW MODAL -->
+<div class="wn-overlay" id="wn-overlay" onclick="closeWhatsNew(event)">
+  <div class="wn-modal">
+    <div class="wn-handle"></div>
+    <div class="wn-title">What's New ✨</div>
+    <div class="wn-subtitle">Here's what got added recently</div>
+
+    <div class="wn-item">
+      <div class="wn-icon">☀️</div>
+      <div>
+        <div class="wn-item-title">Summer Break Screen</div>
+        <div class="wn-item-desc">When school's out, the app locks and shows a live countdown to September 10 — the first day of 7th grade.</div>
+      </div>
+    </div>
+    <div class="wn-item">
+      <div class="wn-icon">🚀</div>
+      <div>
+        <div class="wn-item-title">7th Grade Coming Soon</div>
+        <div class="wn-item-desc">After summer, the app shows a "coming soon" page while the new schedule gets set up for 7th grade.</div>
+      </div>
+    </div>
+    <div class="wn-item">
+      <div class="wn-icon">⏳</div>
+      <div>
+        <div class="wn-item-title">Summer Countdown in the App</div>
+        <div class="wn-item-desc">A live timer at the bottom of the schedule ticks down the days, hours, minutes, and seconds until summer break.</div>
+      </div>
+    </div>
+    <div class="wn-item">
+      <div class="wn-icon">📍</div>
+      <div>
+        <div class="wn-item-title">Room Number on Class Button</div>
+        <div class="wn-item-desc">The class button now shows 6-208 as the main room number, with Homeroom 601 faded underneath.</div>
+      </div>
+    </div>
+    <div class="wn-item">
+      <div class="wn-icon">👋</div>
+      <div>
+        <div class="wn-item-title">See You Next Week</div>
+        <div class="wn-item-desc">On Fridays after school, instead of "See you tomorrow" it now says "See you next week!" — because, well, it's the weekend.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -479,6 +615,22 @@ function goToApp() {
   render();
   setInterval(render, 1000);
   setTimeout(runIntro, 100);
+
+  // Summer countdown in app
+  const SUMMER_START = new Date('2026-06-26T14:25:00-04:00');
+  const banner = document.getElementById('app-summer-countdown');
+  const valEl = document.getElementById('app-summer-val');
+  function tickApp() {
+    const diff = Math.max(0, SUMMER_START - getNYTime());
+    if (diff <= 0) { if(banner) banner.style.display='none'; return; }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (valEl) valEl.textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+  }
+  if (banner) banner.style.display = 'block';
+  tickApp(); setInterval(tickApp, 1000);
 }
 
 /* ════════════════════════════════════════
@@ -810,6 +962,9 @@ function render(){
   if(needsFull){_lastViewDay=viewDay;_lastCurPeriod=curKey;_lastMinute=minute;fullRender(schedule,now,viewDay,realDay,isSchoolDay);}
 }
 
+function openWhatsNew() { document.getElementById('wn-overlay').classList.add('open'); }
+function closeWhatsNew(e) { if (e.target === document.getElementById('wn-overlay')) document.getElementById('wn-overlay').classList.remove('open'); }
+
 /* ════════════════════════════════════════
    SETTINGS MODAL
 ════════════════════════════════════════ */
@@ -846,7 +1001,48 @@ window.addEventListener('offline', updateOnlineStatus);
 ════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
   syncThemeIcons();
-  buildEntrance();
+
+  // ── Phase dates (Eastern Time) ──
+  const SUMMER_START = new Date('2026-06-26T14:25:00-04:00'); // last day of school ends
+  const SUMMER_END   = new Date('2026-09-10T00:00:00-04:00'); // 7th grade starts
+  const now = getNYTime();
+
+  if (now >= SUMMER_END) {
+    // Phase 3: Coming Soon (7th grade)
+    showScreen('comingsoon-screen');
+    syncThemeIcons();
+  } else if (now >= SUMMER_START) {
+    // Phase 2: Summer Break — locked with countdown to Sep 10
+    showScreen('summer-screen');
+    syncThemeIcons();
+    function tickSummer() {
+      const n = getNYTime();
+      const diff = Math.max(0, SUMMER_END - n);
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      const el = document.getElementById('summer-countdown');
+      if (el) el.textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    }
+    tickSummer(); setInterval(tickSummer, 1000);
+  } else {
+    // Phase 1: Normal school year — show entrance + mini summer countdown
+    buildEntrance();
+    const mini = document.getElementById('summer-mini');
+    if (mini) mini.style.display = 'block';
+    function tickMini() {
+      const n = getNYTime();
+      const diff = Math.max(0, SUMMER_START - n);
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      const el = document.getElementById('summer-mini-val');
+      if (el) el.textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    }
+    tickMini(); setInterval(tickMini, 1000);
+  }
 });
 </script>
 </body>
