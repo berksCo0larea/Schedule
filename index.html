@@ -663,7 +663,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-// Expose to window for non-module code
 window._firebaseDb   = db;
 window._firebaseRef  = ref;
 window._firebasePush = push;
@@ -674,14 +673,12 @@ window._firebaseQuery        = query;
 window._firebaseOnValue      = onValue;
 window._firebaseSet          = set;
 
-// ── Connection state ──
 const connRef = ref(db, '.info/connected');
 onValue(connRef, (snap) => {
   const connected = snap.val();
   setChatConnStatus(connected ? 'online' : 'offline');
 });
 
-// ── Listen for new messages ──
 const messagesRef = ref(db, 'chat/601');
 const recentQ = query(messagesRef, limitToLast(80));
 
@@ -701,17 +698,15 @@ onValue(recentQ, (snap) => {
 });
 
 onChildAdded(recentQ, (snap) => {
-  if (loadedKeys.has(snap.key)) return; // already rendered in bulk
+  if (loadedKeys.has(snap.key)) return;
   loadedKeys.add(snap.key);
   window._renderMessages([{ key: snap.key, ...snap.val() }], false);
 });
 
-// ── Typing presence listener ──
 const typingRef = ref(db, 'typing/601');
 onValue(typingRef, (snap) => {
   const data = snap.val() || {};
   const myName = window._chatUsername ? window._chatUsername() : '';
-  // Collect names of others currently typing (ts within last 8s)
   const now = Date.now();
   const typers = Object.entries(data)
     .filter(([name, info]) => name !== myName && info.ts && (now - info.ts) < 8000)
@@ -719,7 +714,6 @@ onValue(typingRef, (snap) => {
   window._renderTyping(typers);
 });
 
-// Expose typing writer
 window._setTyping = function(username, isTyping) {
   if (!username) return;
   const userTypingRef = ref(db, `typing/601/${username}`);
@@ -730,7 +724,6 @@ window._setTyping = function(username, isTyping) {
   }
 };
 
-// Set status connecting initially
 setChatConnStatus('connecting');
 
 function setChatConnStatus(status) {
@@ -772,13 +765,11 @@ let isDark           = localStorage.getItem('darkMode') === 'true';
 let selectedDay      = null;
 const startTime      = Date.now();
 
-// Chat state
 let chatUsername = localStorage.getItem('chatUsername') || '';
-let chatMessages = []; // rendered messages in order
+let chatMessages = [];
 let typingTimeout = null;
 let isCurrentlyTyping = false;
 
-// Expose username getter for Firebase module
 window._chatUsername = () => chatUsername;
 
 document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -827,8 +818,8 @@ function showScreen(id) {
   }, 500);
 }
 
-function goToElective()                 { buildElectivePicker(); showScreen('elective-screen'); }
-function goBack(fromId, toId)           { showScreen(toId); }
+function goToElective()       { buildElectivePicker(); showScreen('elective-screen'); }
+function goBack(fromId, toId) { showScreen(toId); }
 function goToLoading() {
   localStorage.setItem('selectedElective', selectedElective);
   localStorage.setItem('selectedClass', selectedClass);
@@ -998,14 +989,14 @@ function startBalancingAnim() {
 ════════════════════════════════════════ */
 const baseSchedule = {
   Monday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
-    {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
-    {p:4,name:'Chorus 6',teacher:'Castine',room:'308',start:'10:35',end:'11:20'},
-    {p:5,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
+    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:10',end:'8:55'},
+    {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:55',end:'9:40'},
+    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:40',end:'10:20'},
+    {p:4,name:'Chorus 6',teacher:'Castine',room:'308',start:'10:25',end:'11:10'},
+    {p:5,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'11:15',end:'12:00'},
     {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Physical Education',teacher:'Dibbs',room:'GYM',start:'12:50',end:'13:35'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
+    {p:7,name:'Physical Education',teacher:'Dibbs',room:'GYM',start:'12:55',end:'13:40'},
+    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:45',end:'14:25'},
   ],
   Tuesday:[
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
@@ -1066,12 +1057,10 @@ function initChat() {
     document.getElementById('chat-input-area').style.display = 'flex';
   }
 
-  // Enter key sends message
   document.getElementById('chat-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
 
-  // Auto-resize textarea
   document.getElementById('chat-input').addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 100) + 'px';
@@ -1101,8 +1090,6 @@ function setUsername() {
   document.getElementById('chat-input-area').style.display = 'flex';
   updateUserChip();
   document.getElementById('chat-input').focus();
-
-  // Post a system join message
   postSystemMessage(`${chatUsername} joined the chat 👋`);
 }
 
@@ -1146,13 +1133,11 @@ function sendMessage() {
   });
 }
 
-// Called by Firebase module code
 window._renderMessages = function(msgs, isBulk) {
   const container = document.getElementById('chat-messages');
   const empty     = document.getElementById('chat-empty');
 
   if (isBulk) {
-    // Clear and render all
     chatMessages = msgs;
     container.innerHTML = '';
     if (msgs.length === 0) {
@@ -1164,7 +1149,6 @@ window._renderMessages = function(msgs, isBulk) {
     return;
   }
 
-  // Single new message — append
   if (empty && empty.parentNode) empty.remove();
   msgs.forEach(msg => {
     container.appendChild(createMsgEl(msg));
@@ -1192,7 +1176,6 @@ function createMsgEl(msg) {
   div.className = `chat-msg ${isMine ? 'mine' : 'theirs'}`;
 
   const color   = avatarColor(msg.username || '?');
-  const initial = avatarInitial(msg.username || '?');
   const timeStr = msg.ts ? formatChatTime(msg.ts) : '';
 
   div.innerHTML = `
@@ -1262,8 +1245,8 @@ function fullRender(schedule,now,viewDay,realDay,isSchoolDay) {
     const secsLeft = Math.max(0, (endMins - nowMins - now.getSeconds()/60)*60);
     curSec.innerHTML=`<div class="current-card"><div class="accent" style="background:${color}"></div><div class="inner"><div class="period-label"><span class="dot"></span>Period ${cur.p} · now</div><div class="class-name">${cur.name}</div><div class="teacher">${cur.teacher} · Room ${cur.room}</div><div class="time-row"><div><div class="countdown" id="countdown-val">${fmtCountdown(Math.round(secsLeft))}</div><div class="countdown-label">until end</div></div><div class="time-badge">${fmt12(cur.start)} – ${fmt12(cur.end)}</div></div><div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:${pct.toFixed(2)}%;background:${color}"></div></div></div></div>`;
   } else {
-    const firstStart = toMins(dayPeriods[0]?.start||'8:20');
-    curSec.innerHTML=`<div class="current-card"><div style="padding:4px 0"><div class="period-label">${nowMins<firstStart?"school hasn't started yet":"school's done"}</div><div class="class-name">${nowMins<firstStart?'First period at '+fmt12(dayPeriods[0]?.start||'8:20'):now.getDay()===5?'See you next week!':'See you tomorrow!'}</div></div></div>`;
+    const firstStart = toMins(dayPeriods[0]?.start||'8:10');
+    curSec.innerHTML=`<div class="current-card"><div style="padding:4px 0"><div class="period-label">${nowMins<firstStart?"school hasn't started yet":"school's done"}</div><div class="class-name">${nowMins<firstStart?'First period at '+fmt12(dayPeriods[0]?.start||'8:10'):now.getDay()===5?'See you next week!':'See you tomorrow!'}</div></div></div>`;
   }
 
   const nxtSec = document.getElementById('next-section');
@@ -1383,7 +1366,6 @@ window.addEventListener('DOMContentLoaded', () => {
     tickMini(); setInterval(tickMini, 1000);
   }
 
-  // Pre-fill username input if returning user
   if (chatUsername) {
     const inp = document.getElementById('chat-username-input');
     if (inp) inp.value = chatUsername;
