@@ -36,12 +36,10 @@
   }
   canvas#bg-canvas { position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0; }
 
-  /* ══ SCREEN MANAGER ══ */
   .screen { position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column; transition:opacity 0.5s, transform 0.5s; }
   .screen.hidden { opacity:0; pointer-events:none; transform:scale(0.96); }
   .screen.gone { display:none; }
 
-  /* ══ ENTRANCE ══ */
   #entrance-screen { background: var(--bg); gap: 0; padding: 32px 24px; }
   .entrance-inner { max-width: 420px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 0; }
   .entrance-logo { width: 72px; height: 72px; border-radius: 22px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 34px; margin-bottom: 22px; box-shadow: 0 8px 28px rgba(0,0,0,0.18); animation: logoBounce 0.9s cubic-bezier(0.34,1.56,0.64,1) both 0.1s; }
@@ -67,7 +65,6 @@
   .whats-new-dot { width: 7px; height: 7px; border-radius: 50%; background: #1D9E75; animation: pulse-dot 2s ease-in-out infinite; }
   @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:0.6} }
 
-  /* What's New Modal */
   .wn-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
   .wn-overlay.open { opacity: 1; pointer-events: all; }
   .wn-modal { background: var(--bg2); border-radius: 28px 28px 0 0; padding: 12px 24px 40px; width: 100%; max-width: 480px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); max-height: 80vh; overflow-y: auto; }
@@ -80,7 +77,6 @@
   .wn-item-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
   .wn-item-desc { font-size: 13px; color: var(--text2); line-height: 1.5; font-weight: 600; }
 
-  /* ══ ELECTIVE SCREEN ══ */
   #elective-screen { background: var(--bg); padding: 32px 24px; }
   .elective-inner { max-width: 420px; width: 100%; display: flex; flex-direction: column; align-items: center; }
   .elective-back { align-self: flex-start; background: var(--bg2); border: 1.5px solid var(--border2); border-radius: 12px; padding: 8px 14px; font-size: 13px; font-weight: 800; color: var(--text2); cursor: pointer; font-family: var(--font); box-shadow: var(--card-shadow); margin-bottom: 22px; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s; }
@@ -97,7 +93,6 @@
   .elective-continue:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.22); }
   .elective-continue:active { transform: scale(0.96); }
 
-  /* ══ LOADING ══ */
   #loading-screen { background: var(--bg); flex-direction: column; gap: 0; }
   .loading-canvas-wrap { position: relative; width: 220px; height: 220px; margin-bottom: 20px; }
   #balance-canvas { display: block; }
@@ -110,7 +105,6 @@
   .loading-dot:nth-child(3) { animation-delay: 0.4s; }
   @keyframes loadDot { 0%,80%,100% { transform: scale(0.7); background: var(--border2); } 40% { transform: scale(1.2); background: var(--accent); } }
 
-  /* ══ MAIN APP ══ */
   #app-screen { position: fixed; inset: 0; z-index: 10; overflow-y: auto; background: var(--bg); transition: opacity 0.5s, transform 0.5s; display: block; padding: 16px; }
   #app-screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.96); }
   #app-screen.gone { display: none; }
@@ -168,7 +162,6 @@
   .room-badge { font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:3px 8px;flex-shrink:0;font-weight:700;font-family:var(--mono); }
   .dot { width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;animation:pulse 1.5s infinite; }
 
-  /* ══ CHAT SECTION ══ */
   .chat-section {
     margin-top: 20px;
     background: var(--bg2);
@@ -185,210 +178,68 @@
     align-items: center;
     justify-content: space-between;
   }
-  .chat-header-left {
-    display: flex; align-items: center; gap: 10px;
-  }
-  .chat-title {
-    font-size: 15px; font-weight: 900; color: var(--text);
-  }
-  .chat-subtitle {
-    font-size: 11px; font-weight: 700; color: var(--text3);
-    text-transform: uppercase; letter-spacing: 0.07em;
-  }
-  .chat-conn-badge {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 11px; font-weight: 800;
-    padding: 4px 10px; border-radius: 999px;
-    border: 1.5px solid var(--border);
-    background: var(--bg3);
-    transition: all 0.3s;
-  }
+  .chat-header-left { display: flex; align-items: center; gap: 10px; }
+  .chat-title { font-size: 15px; font-weight: 900; color: var(--text); }
+  .chat-subtitle { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; }
+  .chat-conn-badge { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--bg3); transition: all 0.3s; }
   .chat-conn-badge.online  { color: #22c55e; border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.07); }
   .chat-conn-badge.offline { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.07); }
   .chat-conn-badge.connecting { color: #f59e0b; border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); }
-  .chat-conn-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-  }
+  .chat-conn-dot { width: 6px; height: 6px; border-radius: 50%; }
   .chat-conn-badge.online .chat-conn-dot    { background: #22c55e; animation: pulse 1.5s infinite; }
   .chat-conn-badge.offline .chat-conn-dot   { background: #f87171; }
   .chat-conn-badge.connecting .chat-conn-dot { background: #f59e0b; animation: pulse 0.8s infinite; }
 
-  /* Username prompt */
-  .chat-username-prompt {
-    padding: 20px 16px;
-    display: flex; flex-direction: column; gap: 10px;
-    border-bottom: 1.5px solid var(--border);
-  }
-  .chat-username-label {
-    font-size: 13px; font-weight: 800; color: var(--text2);
-  }
-  .chat-username-row {
-    display: flex; gap: 8px;
-  }
-  .chat-username-input {
-    flex: 1; padding: 10px 14px; border-radius: 12px;
-    border: 1.5px solid var(--border2); background: var(--bg3);
-    font-family: var(--font); font-size: 14px; font-weight: 700;
-    color: var(--text); outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .chat-username-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
-  }
-  .chat-username-btn {
-    padding: 10px 18px; border-radius: 12px;
-    background: var(--accent); color: var(--accent-inv);
-    font-family: var(--font); font-size: 14px; font-weight: 800;
-    border: none; cursor: pointer;
-    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
-  }
+  .chat-username-prompt { padding: 20px 16px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1.5px solid var(--border); }
+  .chat-username-label { font-size: 13px; font-weight: 800; color: var(--text2); }
+  .chat-username-row { display: flex; gap: 8px; }
+  .chat-username-input { flex: 1; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--border2); background: var(--bg3); font-family: var(--font); font-size: 14px; font-weight: 700; color: var(--text); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+  .chat-username-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
+  .chat-username-btn { padding: 10px 18px; border-radius: 12px; background: var(--accent); color: var(--accent-inv); font-family: var(--font); font-size: 14px; font-weight: 800; border: none; cursor: pointer; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s; }
   .chat-username-btn:hover { transform: scale(1.05); box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
 
-  /* Messages area */
-  .chat-messages {
-    height: 280px;
-    overflow-y: auto;
-    padding: 14px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    scroll-behavior: smooth;
-  }
+  .chat-messages { height: 280px; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: smooth; }
   .chat-messages::-webkit-scrollbar { width: 4px; }
   .chat-messages::-webkit-scrollbar-track { background: transparent; }
   .chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-  .chat-msg {
-    display: flex; flex-direction: column; max-width: 78%;
-    animation: msgSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
+  .chat-msg { display: flex; flex-direction: column; max-width: 78%; animation: msgSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
   .chat-msg.mine { align-self: flex-end; align-items: flex-end; }
   .chat-msg.theirs { align-self: flex-start; align-items: flex-start; }
-  .chat-msg-meta {
-    font-size: 10px; font-weight: 800; color: var(--text3);
-    margin-bottom: 3px; letter-spacing: 0.04em;
-  }
+  .chat-msg-meta { font-size: 10px; font-weight: 800; color: var(--text3); margin-bottom: 3px; letter-spacing: 0.04em; }
   .chat-msg.mine .chat-msg-meta { text-align: right; }
-  .chat-msg-bubble {
-    padding: 9px 13px; border-radius: 16px;
-    font-size: 14px; font-weight: 600; line-height: 1.45;
-    word-break: break-word;
-  }
-  .chat-msg.mine .chat-msg-bubble {
-    background: var(--chat-mine); color: var(--chat-mine-text);
-    border-radius: 16px 16px 4px 16px;
-  }
-  .chat-msg.theirs .chat-msg-bubble {
-    background: var(--chat-other); color: var(--chat-other-text);
-    border: 1.5px solid var(--border);
-    border-radius: 16px 16px 16px 4px;
-  }
-  .chat-msg-time {
-    font-size: 10px; color: var(--text3); font-family: var(--mono);
-    margin-top: 3px; font-weight: 500;
-  }
+  .chat-msg-bubble { padding: 9px 13px; border-radius: 16px; font-size: 14px; font-weight: 600; line-height: 1.45; word-break: break-word; }
+  .chat-msg.mine .chat-msg-bubble { background: var(--chat-mine); color: var(--chat-mine-text); border-radius: 16px 16px 4px 16px; }
+  .chat-msg.theirs .chat-msg-bubble { background: var(--chat-other); color: var(--chat-other-text); border: 1.5px solid var(--border); border-radius: 16px 16px 16px 4px; }
+  .chat-msg-time { font-size: 10px; color: var(--text3); font-family: var(--mono); margin-top: 3px; font-weight: 500; }
 
-  /* System messages */
-  .chat-system-msg {
-    text-align: center; font-size: 11px; font-weight: 700;
-    color: var(--text3); padding: 4px 0;
-    letter-spacing: 0.03em;
-  }
-
-  /* Empty state */
-  .chat-empty {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 6px; color: var(--text3); padding: 20px;
-  }
+  .chat-system-msg { text-align: center; font-size: 11px; font-weight: 700; color: var(--text3); padding: 4px 0; letter-spacing: 0.03em; }
+  .chat-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--text3); padding: 20px; }
   .chat-empty-icon { font-size: 28px; }
   .chat-empty-text { font-size: 13px; font-weight: 700; }
 
-  /* Input area */
-  .chat-input-area {
-    padding: 12px 12px 14px;
-    border-top: 1.5px solid var(--border);
-    display: flex; gap: 8px; align-items: flex-end;
-  }
-  .chat-input {
-    flex: 1; padding: 10px 14px; border-radius: 14px;
-    border: 1.5px solid var(--border2); background: var(--bg3);
-    font-family: var(--font); font-size: 14px; font-weight: 600;
-    color: var(--text); outline: none; resize: none;
-    max-height: 100px; min-height: 40px; line-height: 1.4;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .chat-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
-  }
-  .chat-send-btn {
-    width: 40px; height: 40px; border-radius: 12px;
-    background: var(--accent); color: var(--accent-inv);
-    border: none; cursor: pointer; font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, opacity 0.2s;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-  }
+  .chat-input-area { padding: 12px 12px 14px; border-top: 1.5px solid var(--border); display: flex; gap: 8px; align-items: flex-end; }
+  .chat-input { flex: 1; padding: 10px 14px; border-radius: 14px; border: 1.5px solid var(--border2); background: var(--bg3); font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--text); outline: none; resize: none; max-height: 100px; min-height: 40px; line-height: 1.4; transition: border-color 0.2s, box-shadow 0.2s; }
+  .chat-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
+  .chat-send-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--accent); color: var(--accent-inv); border: none; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, opacity 0.2s; box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
   .chat-send-btn:hover { transform: scale(1.1); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
   .chat-send-btn:active { transform: scale(0.92); }
   .chat-send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
-  /* Username chip in header */
-  .chat-user-chip {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--bg3); border: 1.5px solid var(--border);
-    border-radius: 999px; padding: 4px 10px 4px 8px;
-    font-size: 12px; font-weight: 800; color: var(--text2);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
+  .chat-user-chip { display: flex; align-items: center; gap: 6px; background: var(--bg3); border: 1.5px solid var(--border); border-radius: 999px; padding: 4px 10px 4px 8px; font-size: 12px; font-weight: 800; color: var(--text2); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
   .chat-user-chip:hover { transform: scale(1.04); box-shadow: var(--card-shadow-hover); }
-  .chat-user-avatar {
-    width: 18px; height: 18px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 900;
-    flex-shrink: 0;
-  }
+  .chat-user-avatar { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; flex-shrink: 0; }
 
-  @keyframes msgSlideIn {
-    0% { opacity:0; transform: translateY(10px) scale(0.95); }
-    60% { opacity:1; transform: translateY(-2px) scale(1.01); }
-    100% { transform: translateY(0) scale(1); }
-  }
+  @keyframes msgSlideIn { 0% { opacity:0; transform: translateY(10px) scale(0.95); } 60% { opacity:1; transform: translateY(-2px) scale(1.01); } 100% { transform: translateY(0) scale(1); } }
 
-  /* ── Typing indicator ── */
-  .chat-typing-row {
-    display: flex; align-items: center; gap: 7px;
-    padding: 4px 2px 2px;
-    min-height: 28px;
-    animation: msgSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
-  .chat-typing-names {
-    font-size: 11px; font-weight: 800; color: var(--text3);
-    letter-spacing: 0.02em;
-  }
-  .chat-typing-bubble {
-    display: flex; align-items: center; gap: 3px;
-    background: var(--bg3); border: 1.5px solid var(--border);
-    border-radius: 12px 12px 12px 4px;
-    padding: 6px 10px;
-  }
-  .chat-typing-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--text3);
-    animation: typingBounce 1.2s ease-in-out infinite;
-  }
+  .chat-typing-row { display: flex; align-items: center; gap: 7px; padding: 4px 2px 2px; min-height: 28px; animation: msgSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .chat-typing-names { font-size: 11px; font-weight: 800; color: var(--text3); letter-spacing: 0.02em; }
+  .chat-typing-bubble { display: flex; align-items: center; gap: 3px; background: var(--bg3); border: 1.5px solid var(--border); border-radius: 12px 12px 12px 4px; padding: 6px 10px; }
+  .chat-typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: typingBounce 1.2s ease-in-out infinite; }
   .chat-typing-dot:nth-child(2) { animation-delay: 0.18s; }
   .chat-typing-dot:nth-child(3) { animation-delay: 0.36s; }
-  @keyframes typingBounce {
-    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
-    30%         { transform: translateY(-5px); opacity: 1; }
-  }
+  @keyframes typingBounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
 
-  /* ══ MODALS ══ */
   .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);z-index:100;align-items:flex-end;justify-content:center; }
   .modal-overlay.open { display:flex;animation:fadeIn 0.2s ease; }
   .modal { background:var(--bg2);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:24px 20px 40px;border-top:1.5px solid var(--border);box-shadow:0 -8px 40px rgba(0,0,0,0.15);animation:slideUpModal 0.35s cubic-bezier(0.34,1.56,0.64,1); }
@@ -403,12 +254,10 @@
   .modal-save { width:100%;margin-top:18px;padding:15px;border-radius:14px;background:var(--accent);color:var(--accent-inv);font-size:15px;font-weight:900;border:none;cursor:pointer;font-family:var(--font);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s;box-shadow:0 4px 14px rgba(0,0,0,0.12); }
   .modal-save:hover { transform:translateY(-3px) scale(1.03);box-shadow:0 10px 28px rgba(0,0,0,0.2); }
 
-  /* ══ FOOTER ══ */
   .footer { margin-top:28px;padding-top:16px;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;gap:7px; margin-bottom: 24px; }
   .footer-text { font-size:12px;color:var(--text3);font-weight:700; }
   .footer-code { font-size:13px;color:var(--text3);font-weight:700;font-family:var(--mono); }
 
-  /* ══ ANIMATIONS ══ */
   @keyframes logoBounce { 0%{opacity:0;transform:scale(0.4) translateY(30px)} 60%{opacity:1;transform:scale(1.15) translateY(-8px)} 80%{transform:scale(0.95) translateY(3px)} 100%{transform:scale(1) translateY(0)} }
   @keyframes slideDown { 0%{opacity:0;transform:translateY(-30px) scale(0.95)} 60%{opacity:1;transform:translateY(6px) scale(1.02)} 80%{transform:translateY(-3px) scale(0.99)} 100%{transform:translateY(0) scale(1)} }
   @keyframes slideUp { 0%{opacity:0;transform:translateY(30px) scale(0.95)} 60%{opacity:1;transform:translateY(-6px) scale(1.02)} 80%{transform:translateY(3px) scale(0.99)} 100%{transform:translateY(0) scale(1)} }
@@ -423,7 +272,6 @@
 
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-<!-- ══ ENTRANCE SCREEN ══ -->
 <div class="screen" id="entrance-screen">
   <div class="entrance-inner">
     <div class="entrance-logo">📅</div>
@@ -445,7 +293,6 @@
   </div>
 </div>
 
-<!-- ══ ELECTIVE SCREEN ══ -->
 <div class="screen hidden" id="elective-screen">
   <div class="elective-inner">
     <button class="elective-back" onclick="goBack('elective-screen','entrance-screen')">← Back</button>
@@ -457,7 +304,6 @@
   </div>
 </div>
 
-<!-- ══ LOADING SCREEN ══ -->
 <div class="screen hidden" id="loading-screen">
   <div class="loading-canvas-wrap">
     <canvas id="balance-canvas" width="220" height="220"></canvas>
@@ -471,7 +317,6 @@
   </div>
 </div>
 
-<!-- ══ MAIN SCHEDULE APP ══ -->
 <div id="app-screen" class="hidden gone">
   <div class="app">
     <div class="header">
@@ -501,9 +346,7 @@
       <div id="app-summer-val" style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text2);letter-spacing:0.03em;">--d --h --m --s</div>
     </div>
 
-    <!-- ══ CHAT SECTION ══ -->
     <div class="chat-section" id="chat-section" style="margin-top:20px;">
-      <!-- Header -->
       <div class="chat-header">
         <div class="chat-header-left">
           <div>
@@ -520,7 +363,6 @@
         </div>
       </div>
 
-      <!-- Username Prompt (shown if no username yet) -->
       <div class="chat-username-prompt" id="chat-username-prompt">
         <div class="chat-username-label">👋 Pick a username to join the chat</div>
         <div class="chat-username-row">
@@ -529,7 +371,6 @@
         </div>
       </div>
 
-      <!-- Messages -->
       <div class="chat-messages" id="chat-messages">
         <div class="chat-empty" id="chat-empty">
           <div class="chat-empty-icon">💬</div>
@@ -537,15 +378,11 @@
         </div>
       </div>
 
-      <!-- Typing indicator -->
       <div id="chat-typing-indicator" style="display:none; padding: 0 12px 6px;"></div>
 
-      <!-- Input -->
       <div class="chat-input-area" id="chat-input-area" style="display:none;">
         <textarea class="chat-input" id="chat-input" placeholder="Message Class 601…" rows="1" maxlength="500"></textarea>
-        <button class="chat-send-btn" id="chat-send-btn" onclick="sendMessage()" title="Send">
-          ↑
-        </button>
+        <button class="chat-send-btn" id="chat-send-btn" onclick="sendMessage()" title="Send">↑</button>
       </div>
     </div>
 
@@ -556,7 +393,6 @@
   </div>
 </div>
 
-<!-- ══ SUMMER BREAK SCREEN ══ -->
 <div class="screen hidden gone" id="summer-screen">
   <div class="entrance-inner" style="gap:18px;text-align:center;">
     <div style="font-size:64px;line-height:1;">☀️</div>
@@ -573,7 +409,6 @@
   </div>
 </div>
 
-<!-- ══ 7TH GRADE COMING SOON ══ -->
 <div class="screen hidden gone" id="comingsoon-screen">
   <div class="entrance-inner" style="gap:18px;text-align:center;">
     <div style="font-size:64px;line-height:1;">🚀</div>
@@ -589,7 +424,6 @@
   </div>
 </div>
 
-<!-- WHAT'S NEW MODAL -->
 <div class="wn-overlay" id="wn-overlay" onclick="closeWhatsNew(event)">
   <div class="wn-modal">
     <div class="wn-handle"></div>
@@ -633,7 +467,6 @@
   </div>
 </div>
 
-<!-- SETTINGS MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -644,7 +477,6 @@
   </div>
 </div>
 
-<!-- Firebase SDKs -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, serverTimestamp, onDisconnect, set, onChildAdded, limitToLast, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -737,9 +569,6 @@ window._setChatConnStatus = setChatConnStatus;
 </script>
 
 <script>
-/* ════════════════════════════════════════
-   CONSTANTS & STATE
-════════════════════════════════════════ */
 const DAYS    = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
 const toMins  = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
 
@@ -774,9 +603,6 @@ window._chatUsername = () => chatUsername;
 
 document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
 
-/* ════════════════════════════════════════
-   AVATAR COLOR
-════════════════════════════════════════ */
 function avatarColor(name) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -784,9 +610,6 @@ function avatarColor(name) {
 }
 function avatarInitial(name) { return name ? name[0].toUpperCase() : '?'; }
 
-/* ════════════════════════════════════════
-   THEME
-════════════════════════════════════════ */
 function toggleTheme() {
   isDark = !isDark;
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
@@ -801,9 +624,6 @@ function syncThemeIcons() {
   });
 }
 
-/* ════════════════════════════════════════
-   SCREEN NAVIGATION
-════════════════════════════════════════ */
 function showScreen(id) {
   document.querySelectorAll('.screen, #app-screen').forEach(s => {
     s.classList.add('hidden'); s.classList.remove('gone');
@@ -854,9 +674,6 @@ function goToApp() {
   tickApp(); setInterval(tickApp, 1000);
 }
 
-/* ════════════════════════════════════════
-   ENTRANCE
-════════════════════════════════════════ */
 function buildEntrance() {
   const grid = document.getElementById('class-grid');
   grid.innerHTML = CLASSES.map((c, i) => `
@@ -878,9 +695,6 @@ function pickClass(id) {
   });
 }
 
-/* ════════════════════════════════════════
-   ELECTIVE PICKER
-════════════════════════════════════════ */
 function buildElectivePicker() {
   const grid = document.getElementById('elective-pick-grid');
   grid.innerHTML = ELECTIVES.map(e => `
@@ -895,9 +709,6 @@ function pickElectiveOnboard(name) {
   });
 }
 
-/* ════════════════════════════════════════
-   LOADING ANIMATION
-════════════════════════════════════════ */
 const LOADING_MESSAGES = ['Setting things up…','Loading your classes…','just wait bruv','Almost there…','Ready!'];
 
 function startLoadingAnim() {
@@ -965,9 +776,6 @@ function startBalancingAnim() {
   obs.observe(document.getElementById('loading-screen'), {attributes:true, attributeFilter:['class']});
 }
 
-/* ════════════════════════════════════════
-   BACKGROUND CANVAS
-════════════════════════════════════════ */
 (function() {
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
@@ -984,9 +792,6 @@ function startBalancingAnim() {
   window.addEventListener('resize', resize); resize(); tick();
 })();
 
-/* ════════════════════════════════════════
-   SCHEDULE DATA
-════════════════════════════════════════ */
 const baseSchedule = {
   Monday:[
     {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:10',end:'8:55'},
@@ -999,44 +804,44 @@ const baseSchedule = {
     {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:45',end:'14:25'},
   ],
   Tuesday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
-    {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
-    {p:4,name:'Chorus 6',teacher:'Castine',room:'308',start:'10:35',end:'11:20'},
-    {p:5,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
+    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:10',end:'8:55'},
+    {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:55',end:'9:40'},
+    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:40',end:'10:20'},
+    {p:4,name:'Chorus 6',teacher:'Castine',room:'308',start:'10:25',end:'11:10'},
+    {p:5,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'11:15',end:'12:00'},
     {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Physical Education',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
+    {p:7,name:'Physical Education',teacher:'Dibbs',room:'GYM',start:'12:55',end:'13:40'},
+    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:45',end:'14:25'},
   ],
   Wednesday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
-    {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
-    {p:4,name:'Technology 6',teacher:'Logozzo',room:'208',start:'10:35',end:'11:20'},
-    {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
+    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:10',end:'8:55'},
+    {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:55',end:'9:40'},
+    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:40',end:'10:20'},
+    {p:4,name:'Technology 6',teacher:'Logozzo',room:'208',start:'10:25',end:'11:10'},
+    {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:15',end:'12:00'},
     {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Physical Education',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
+    {p:7,name:'Physical Education',teacher:'Dibbs',room:'GYM',start:'12:55',end:'13:40'},
+    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:45',end:'14:25'},
   ],
   Thursday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
-    {p:2,name:'Health 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
-    {p:4,name:'Civics For All',teacher:'Zera',room:'208',start:'10:35',end:'11:20'},
-    {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
+    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:10',end:'8:55'},
+    {p:2,name:'Health 6',teacher:'Petrizzo',room:'208',start:'8:55',end:'9:40'},
+    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:40',end:'10:20'},
+    {p:4,name:'Civics For All',teacher:'Zera',room:'208',start:'10:25',end:'11:10'},
+    {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:15',end:'12:00'},
     {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
+    {p:7,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'12:55',end:'13:40'},
+    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:45',end:'14:25'},
   ],
   Friday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
-    {p:2,name:'Health 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'Spanish 6',teacher:'Scandole',room:'208',start:'9:50',end:'10:35'},
-    {p:4,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'10:35',end:'11:20'},
-    {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
+    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:10',end:'8:55'},
+    {p:2,name:'Health 6',teacher:'Petrizzo',room:'208',start:'8:55',end:'9:40'},
+    {p:3,name:'Spanish 6',teacher:'Scandole',room:'208',start:'9:40',end:'10:20'},
+    {p:4,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'10:25',end:'11:10'},
+    {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:15',end:'12:00'},
     {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
+    {p:7,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'12:55',end:'13:40'},
+    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:45',end:'14:25'},
   ],
 };
 
@@ -1047,9 +852,6 @@ function getSchedule() {
   return out;
 }
 
-/* ════════════════════════════════════════
-   CHAT
-════════════════════════════════════════ */
 function initChat() {
   updateUserChip();
   if (chatUsername) {
@@ -1204,9 +1006,15 @@ function escHtml(str) {
     .replace(/"/g,'&quot;');
 }
 
-/* ════════════════════════════════════════
-   SCHEDULE RENDER
-════════════════════════════════════════ */
+window._renderTyping = function(typers) {
+  const el = document.getElementById('chat-typing-indicator');
+  if (!el) return;
+  if (typers.length === 0) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = 'block';
+  const names = typers.slice(0,3).join(', ');
+  el.innerHTML = `<div class="chat-typing-row"><div class="chat-typing-bubble"><div class="chat-typing-dot"></div><div class="chat-typing-dot"></div><div class="chat-typing-dot"></div></div><div class="chat-typing-names">${escHtml(names)} typing…</div></div>`;
+};
+
 let _lastOnline=null, _lastViewDay=null, _lastCurPeriod=null, _lastMinute=-1;
 function getNYTime() { return new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'})); }
 function getDayName(d) { return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]; }
@@ -1286,9 +1094,6 @@ function render() {
   }
 }
 
-/* ════════════════════════════════════════
-   MODALS
-════════════════════════════════════════ */
 function openWhatsNew()   { document.getElementById('wn-overlay').classList.add('open'); }
 function closeWhatsNew(e) { if (e.target === document.getElementById('wn-overlay')) document.getElementById('wn-overlay').classList.remove('open'); }
 function openSettings() {
@@ -1310,9 +1115,6 @@ function saveSettings() {
 function overlayClick(e) { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); }
 window.selectDay = function(d) { selectedDay = d; _lastViewDay = null; render(); };
 
-/* ════════════════════════════════════════
-   INTRO ANIMATION
-════════════════════════════════════════ */
 function runIntro() {
   const els = [
     {el: document.querySelector('.header'),              anim:'slideDown 0.7s cubic-bezier(0.34,1.56,0.64,1) both'},
@@ -1333,9 +1135,6 @@ function runIntro() {
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
-/* ════════════════════════════════════════
-   INIT
-════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
   syncThemeIcons();
   const SUMMER_START = new Date('2026-06-26T14:25:00-04:00');
