@@ -1,1376 +1,197 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Schedule</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<title>Maintenance Break</title>
+
 <style>
-  :root {
-    --bg: #f0efeb; --bg2: #ffffff; --bg3: #f7f6f2;
-    --border: #e2e0d8; --border2: #d0cec4;
-    --text: #1a1916; --text2: #6b6860; --text3: #a8a59e;
-    --accent: #1a1916; --accent-inv: #ffffff;
-    --card-shadow: 0 2px 8px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
-    --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06);
-    --font: 'Nunito', sans-serif; --mono: 'JetBrains Mono', monospace;
-    --chat-mine: #1a1916; --chat-mine-text: #ffffff;
-    --chat-other: #ffffff; --chat-other-text: #1a1916;
-  }
-  [data-theme="dark"] {
-    --bg: #111010; --bg2: #1c1b1a; --bg3: #161514;
-    --border: #2c2a28; --border2: #3a3835;
-    --text: #f0ede8; --text2: #9e9b96; --text3: #5c5a56;
-    --accent: #f0ede8; --accent-inv: #111010;
-    --card-shadow: 0 2px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
-    --card-shadow-hover: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.07);
-    --chat-mine: #f0ede8; --chat-mine-text: #111010;
-    --chat-other: #1c1b1a; --chat-other-text: #f0ede8;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: var(--font); background: var(--bg); color: var(--text);
-    min-height: 100vh; overflow-x: hidden;
-    transition: background 0.4s, color 0.4s;
-  }
-  canvas#bg-canvas { position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0; }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-  /* ══ SCREEN MANAGER ══ */
-  .screen { position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column; transition:opacity 0.5s, transform 0.5s; }
-  .screen.hidden { opacity:0; pointer-events:none; transform:scale(0.96); }
-  .screen.gone { display:none; }
+body{
+    background:#111827;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Segoe UI, sans-serif;
+    color:white;
+}
 
-  /* ══ ENTRANCE ══ */
-  #entrance-screen { background: var(--bg); gap: 0; padding: 32px 24px; }
-  .entrance-inner { max-width: 420px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 0; }
-  .entrance-logo { width: 72px; height: 72px; border-radius: 22px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 34px; margin-bottom: 22px; box-shadow: 0 8px 28px rgba(0,0,0,0.18); animation: logoBounce 0.9s cubic-bezier(0.34,1.56,0.64,1) both 0.1s; }
-  .entrance-title { font-size: 34px; font-weight: 900; letter-spacing: -1px; color: var(--text); text-align: center; margin-bottom: 6px; animation: slideDown 0.7s cubic-bezier(0.34,1.56,0.64,1) both 0.25s; }
-  .entrance-sub { font-size: 14px; color: var(--text3); font-weight: 700; text-align: center; margin-bottom: 36px; animation: slideDown 0.7s cubic-bezier(0.34,1.56,0.64,1) both 0.32s; }
-  .class-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 10px; }
-  .class-btn { padding: 18px 14px; border-radius: 18px; border: 2px solid var(--border2); background: var(--bg2); font-family: var(--font); font-size: 15px; font-weight: 900; color: var(--text); cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 4px; box-shadow: var(--card-shadow); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, background 0.2s, border-color 0.2s; animation: bounceIn 0.65s cubic-bezier(0.34,1.56,0.64,1) both; }
-  .class-btn.active-class { border-color: var(--accent); background: var(--accent); color: var(--accent-inv); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-  .class-btn:hover:not(.coming-soon-btn) { transform: translateY(-4px) scale(1.03); box-shadow: var(--card-shadow-hover); }
-  .class-btn:active:not(.coming-soon-btn) { transform: scale(0.95); }
-  .class-btn-label { font-size: 11px; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; }
-  .class-btn.active-class .class-btn-label { color: var(--accent-inv); opacity: 0.6; }
-  .coming-soon-btn { cursor: not-allowed; opacity: 0.45; position: relative; overflow: hidden; }
-  .cs-tag { font-size: 9px; font-weight: 900; background: var(--border2); color: var(--text3); border-radius: 6px; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.06em; display: inline-block; margin-top: 2px; }
-  .entrance-continue { width: 100%; padding: 16px; border-radius: 16px; background: var(--accent); color: var(--accent-inv); font-size: 16px; font-weight: 900; border: none; cursor: pointer; font-family: var(--font); box-shadow: 0 6px 20px rgba(0,0,0,0.15); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s; margin-top: 8px; animation: slideUp 0.7s cubic-bezier(0.34,1.56,0.64,1) both 0.55s; }
-  .entrance-continue:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.22); }
-  .entrance-continue:active { transform: scale(0.96); }
-  .entrance-theme-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 22px; animation: fadeIn 0.5s ease both 0.7s; }
-  .entrance-theme-btn { background: var(--bg2); border: 1.5px solid var(--border2); border-radius: 50%; width: 36px; height: 36px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
-  .entrance-theme-btn:hover { transform: scale(1.2) rotate(20deg); }
-  .whats-new-btn { display: flex; align-items: center; gap: 6px; background: var(--bg2); border: 1.5px solid var(--border2); border-radius: 999px; padding: 6px 14px 6px 10px; font-size: 12px; font-weight: 800; color: var(--text2); cursor: pointer; font-family: var(--font); box-shadow: var(--card-shadow); transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s; animation: fadeIn 0.5s ease both 0.65s; margin-bottom: 18px; }
-  .whats-new-btn:hover { transform: scale(1.05); box-shadow: var(--card-shadow-hover); }
-  .whats-new-dot { width: 7px; height: 7px; border-radius: 50%; background: #1D9E75; animation: pulse-dot 2s ease-in-out infinite; }
-  @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:0.6} }
+.container{
+    text-align:center;
+}
 
-  /* What's New Modal */
-  .wn-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-  .wn-overlay.open { opacity: 1; pointer-events: all; }
-  .wn-modal { background: var(--bg2); border-radius: 28px 28px 0 0; padding: 12px 24px 40px; width: 100%; max-width: 480px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); max-height: 80vh; overflow-y: auto; }
-  .wn-overlay.open .wn-modal { transform: translateY(0); }
-  .wn-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 99px; margin: 0 auto 20px; }
-  .wn-title { font-size: 20px; font-weight: 900; margin-bottom: 4px; }
-  .wn-subtitle { font-size: 12px; color: var(--text3); font-weight: 700; margin-bottom: 20px; }
-  .wn-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px; }
-  .wn-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
-  .wn-item-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
-  .wn-item-desc { font-size: 13px; color: var(--text2); line-height: 1.5; font-weight: 600; }
+.gear-system{
+    position:relative;
+    width:220px;
+    height:170px;
+    margin:auto;
+}
 
-  /* ══ ELECTIVE SCREEN ══ */
-  #elective-screen { background: var(--bg); padding: 32px 24px; }
-  .elective-inner { max-width: 420px; width: 100%; display: flex; flex-direction: column; align-items: center; }
-  .elective-back { align-self: flex-start; background: var(--bg2); border: 1.5px solid var(--border2); border-radius: 12px; padding: 8px 14px; font-size: 13px; font-weight: 800; color: var(--text2); cursor: pointer; font-family: var(--font); box-shadow: var(--card-shadow); margin-bottom: 22px; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s; }
-  .elective-back:hover { transform: translateX(-4px) scale(1.04); box-shadow: var(--card-shadow-hover); }
-  .elective-emoji { font-size: 44px; margin-bottom: 14px; }
-  .elective-title { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; color: var(--text); margin-bottom: 6px; text-align: center; }
-  .elective-sub { font-size: 13px; color: var(--text3); font-weight: 700; text-align: center; margin-bottom: 28px; }
-  .elective-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 16px; }
-  .elective-btn { padding: 16px 12px; border-radius: 16px; border: 2px solid var(--border); background: var(--bg3); font-size: 13px; font-weight: 800; color: var(--text2); cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px; font-family: var(--font); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, background 0.2s, border-color 0.2s, color 0.2s; }
-  .elective-btn .ei { font-size: 20px; }
-  .elective-btn.selected { border-color: var(--accent); background: var(--accent); color: var(--accent-inv); transform: scale(1.04); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
-  .elective-btn:hover:not(.selected) { transform: translateY(-3px) scale(1.02); box-shadow: var(--card-shadow-hover); border-color: var(--border2); }
-  .elective-continue { width: 100%; padding: 16px; border-radius: 16px; background: var(--accent); color: var(--accent-inv); font-size: 16px; font-weight: 900; border: none; cursor: pointer; font-family: var(--font); box-shadow: 0 6px 20px rgba(0,0,0,0.15); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s; }
-  .elective-continue:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 14px 32px rgba(0,0,0,0.22); }
-  .elective-continue:active { transform: scale(0.96); }
+/* MAIN GEAR */
+.gear{
+    position:absolute;
+    border-radius:50%;
+    background:
+        radial-gradient(circle at center,
+            #d1d5db 0 15%,
+            #374151 15% 35%,
+            #9ca3af 35% 65%,
+            #4b5563 65% 100%);
+    box-shadow:
+        0 0 20px rgba(255,255,255,.08),
+        inset 0 0 15px rgba(255,255,255,.15);
+}
 
-  /* ══ LOADING ══ */
-  #loading-screen { background: var(--bg); flex-direction: column; gap: 0; }
-  .loading-canvas-wrap { position: relative; width: 220px; height: 220px; margin-bottom: 20px; }
-  #balance-canvas { display: block; }
-  .loading-label { font-size: 15px; font-weight: 800; color: var(--text2); letter-spacing: 0.02em; margin-bottom: 10px; text-align: center; animation: pulse 1.8s ease-in-out infinite; }
-  .loading-bar-wrap { width: 160px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .loading-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; width: 0%; transition: width 0.08s linear; }
-  .loading-dots { display: flex; gap: 7px; margin-top: 18px; }
-  .loading-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border2); animation: loadDot 1.2s ease-in-out infinite; }
-  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
-  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes loadDot { 0%,80%,100% { transform: scale(0.7); background: var(--border2); } 40% { transform: scale(1.2); background: var(--accent); } }
+.gear::before{
+    content:"";
+    position:absolute;
+    inset:20%;
+    border-radius:50%;
+    background:#111827;
+    box-shadow:inset 0 0 10px rgba(0,0,0,.8);
+}
 
-  /* ══ MAIN APP ══ */
-  #app-screen { position: fixed; inset: 0; z-index: 10; overflow-y: auto; background: var(--bg); transition: opacity 0.5s, transform 0.5s; display: block; padding: 16px; }
-  #app-screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.96); }
-  #app-screen.gone { display: none; }
-  .app { max-width: 480px; margin: 0 auto; position: relative; z-index: 1; }
-  .header { margin-bottom: 16px; display: flex; align-items: flex-start; justify-content: space-between; }
-  .school-name { font-size: 11px; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 2px; font-weight: 700; }
-  .app-title { font-size: 28px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
-  .header-right { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-  .theme-btn { width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border2);background:var(--bg2);box-shadow:var(--card-shadow);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.3s; flex-shrink:0; }
-  .theme-btn:hover { transform:scale(1.2) rotate(20deg);box-shadow:var(--card-shadow-hover); }
-  .settings-btn { background:var(--bg2);border:1.5px solid var(--border2);border-radius:12px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:var(--card-shadow);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.3s,color 0.3s;font-family:var(--font); }
-  .settings-btn:hover { background:var(--accent);color:var(--accent-inv);transform:translateY(-3px) scale(1.05);box-shadow:var(--card-shadow-hover); }
-  .status-bar { display:flex;align-items:center;justify-content:space-between;margin-bottom:16px; }
-  .time-display { font-size:13px;color:var(--text3);font-family:var(--mono);font-weight:500; }
-  .status-right { display:flex;align-items:center;gap:10px; }
-  .online-indicator { display:flex;align-items:center;gap:5px;font-size:12px;color:#22c55e;font-weight:700; }
-  .online-dot { width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.5s infinite; }
-  .offline-indicator { display:flex;align-items:center;gap:5px;font-size:12px;color:#f87171;font-weight:700; }
-  .offline-dot { width:7px;height:7px;border-radius:50%;background:#f87171; }
-  .runtime-badge { font-size:11px;color:var(--text3);background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:3px 9px;font-family:var(--mono);font-weight:500; }
-  .current-card { background:var(--bg2);border:1.5px solid var(--border);border-radius:20px;padding:20px;margin-bottom:10px;position:relative;overflow:hidden;box-shadow:var(--card-shadow);transition:box-shadow 0.3s,border-color 0.3s,background 0.3s; }
-  .current-card:hover { box-shadow:var(--card-shadow-hover); }
-  .current-card .accent { position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:4px 0 0 4px; }
-  .current-card .inner { padding-left:14px; }
-  .period-label { font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;display:flex;align-items:center;gap:6px; }
-  .class-name { font-size:23px;font-weight:900;color:var(--text);margin-bottom:3px;letter-spacing:-0.3px; }
-  .teacher { font-size:14px;color:var(--text3);margin-bottom:14px;font-weight:600; }
-  .time-row { display:flex;align-items:center;gap:20px; }
-  .countdown { font-size:30px;font-weight:900;color:var(--text);font-family:var(--mono);letter-spacing:-1px; }
-  .countdown-label { font-size:12px;color:var(--text3);font-weight:600; }
-  .time-badge { font-size:13px;color:var(--text2);display:flex;align-items:center;gap:5px;font-weight:600;font-family:var(--mono); }
-  .progress-bar { height:5px;background:var(--border);border-radius:3px;margin-top:16px;overflow:hidden; }
-  .progress-fill { height:100%;border-radius:3px;transition:width 1s linear; }
-  .next-card { background:var(--bg2);border-radius:14px;padding:13px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--border);box-shadow:var(--card-shadow);cursor:default;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.3s; }
-  .next-card:hover { transform:translateY(-2px) scale(1.01);box-shadow:var(--card-shadow-hover); }
-  .next-label { font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;font-weight:800; }
-  .next-class { font-size:15px;font-weight:800;color:var(--text); }
-  .next-time { font-size:13px;color:var(--text2);font-family:var(--mono);font-weight:500; }
-  .day-tabs { display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding:6px 4px 8px;margin-left:-4px;margin-right:-4px; }
-  .day-tabs::-webkit-scrollbar { display:none; }
-  .day-tab { padding:8px 18px;border-radius:12px;font-size:13px;font-weight:800;border:1.5px solid var(--border);cursor:pointer;white-space:nowrap;background:var(--bg2);color:var(--text3);box-shadow:var(--card-shadow);transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.25s,color 0.25s,border-color 0.25s;font-family:var(--font); }
-  .day-tab:hover:not(.active) { transform:translateY(-4px) scale(1.06);box-shadow:var(--card-shadow-hover);color:var(--text); }
-  .day-tab.active { background:var(--accent);color:var(--accent-inv);border-color:var(--accent);transform:translateY(-3px) scale(1.07);box-shadow:0 8px 20px rgba(0,0,0,0.18); }
-  .schedule-list { display:flex;flex-direction:column;gap:6px; }
-  .period-row { display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;box-shadow:var(--card-shadow);cursor:default;transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,opacity 0.3s,background 0.3s; }
-  .period-row:hover:not(.past-row) { transform:translateX(6px) scale(1.015);box-shadow:var(--card-shadow-hover); }
-  .period-row.active-row { border-color:var(--border2);background:var(--bg3); }
-  .period-row.past-row { opacity:0.35; }
-  .period-num { width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--text3);flex-shrink:0;transition:background 0.3s,color 0.3s,border-color 0.3s; }
-  .period-num.active-num { background:var(--accent);color:var(--accent-inv);border-color:var(--accent);animation:popPulse 2s ease-in-out infinite; }
-  .period-info { flex:1;min-width:0; }
-  .period-class { font-size:14px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-  .period-teacher { font-size:12px;color:var(--text3);font-weight:600; }
-  .period-time { font-size:12px;color:var(--text3);white-space:nowrap;flex-shrink:0;font-family:var(--mono);font-weight:500; }
-  .room-badge { font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:3px 8px;flex-shrink:0;font-weight:700;font-family:var(--mono); }
-  .dot { width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;animation:pulse 1.5s infinite; }
+/* Teeth */
+.teeth{
+    position:absolute;
+    inset:-8px;
+}
 
-  /* ══ CHAT SECTION ══ */
-  .chat-section {
-    margin-top: 20px;
-    background: var(--bg2);
-    border: 1.5px solid var(--border);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: var(--card-shadow);
-    transition: background 0.3s, border-color 0.3s;
-  }
-  .chat-header {
-    padding: 14px 16px 12px;
-    border-bottom: 1.5px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .chat-header-left {
-    display: flex; align-items: center; gap: 10px;
-  }
-  .chat-title {
-    font-size: 15px; font-weight: 900; color: var(--text);
-  }
-  .chat-subtitle {
-    font-size: 11px; font-weight: 700; color: var(--text3);
-    text-transform: uppercase; letter-spacing: 0.07em;
-  }
-  .chat-conn-badge {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 11px; font-weight: 800;
-    padding: 4px 10px; border-radius: 999px;
-    border: 1.5px solid var(--border);
-    background: var(--bg3);
-    transition: all 0.3s;
-  }
-  .chat-conn-badge.online  { color: #22c55e; border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.07); }
-  .chat-conn-badge.offline { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.07); }
-  .chat-conn-badge.connecting { color: #f59e0b; border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); }
-  .chat-conn-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-  }
-  .chat-conn-badge.online .chat-conn-dot    { background: #22c55e; animation: pulse 1.5s infinite; }
-  .chat-conn-badge.offline .chat-conn-dot   { background: #f87171; }
-  .chat-conn-badge.connecting .chat-conn-dot { background: #f59e0b; animation: pulse 0.8s infinite; }
+.tooth{
+    position:absolute;
+    width:10px;
+    height:18px;
+    background:#9ca3af;
+    left:50%;
+    top:50%;
+    margin-left:-5px;
+    margin-top:-9px;
+    border-radius:2px;
+    transform-origin:center center;
+}
 
-  /* Username prompt */
-  .chat-username-prompt {
-    padding: 20px 16px;
-    display: flex; flex-direction: column; gap: 10px;
-    border-bottom: 1.5px solid var(--border);
-  }
-  .chat-username-label {
-    font-size: 13px; font-weight: 800; color: var(--text2);
-  }
-  .chat-username-row {
-    display: flex; gap: 8px;
-  }
-  .chat-username-input {
-    flex: 1; padding: 10px 14px; border-radius: 12px;
-    border: 1.5px solid var(--border2); background: var(--bg3);
-    font-family: var(--font); font-size: 14px; font-weight: 700;
-    color: var(--text); outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .chat-username-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
-  }
-  .chat-username-btn {
-    padding: 10px 18px; border-radius: 12px;
-    background: var(--accent); color: var(--accent-inv);
-    font-family: var(--font); font-size: 14px; font-weight: 800;
-    border: none; cursor: pointer;
-    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
-  }
-  .chat-username-btn:hover { transform: scale(1.05); box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+/* Sizes */
+.large{
+    width:90px;
+    height:90px;
+    left:15px;
+    top:55px;
+    animation:spin 8s linear infinite;
+}
 
-  /* Messages area */
-  .chat-messages {
-    height: 280px;
-    overflow-y: auto;
-    padding: 14px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    scroll-behavior: smooth;
-  }
-  .chat-messages::-webkit-scrollbar { width: 4px; }
-  .chat-messages::-webkit-scrollbar-track { background: transparent; }
-  .chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.medium{
+    width:65px;
+    height:65px;
+    left:95px;
+    top:15px;
+    animation:spin-reverse 6s linear infinite;
+}
 
-  .chat-msg {
-    display: flex; flex-direction: column; max-width: 78%;
-    animation: msgSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
-  .chat-msg.mine { align-self: flex-end; align-items: flex-end; }
-  .chat-msg.theirs { align-self: flex-start; align-items: flex-start; }
-  .chat-msg-meta {
-    font-size: 10px; font-weight: 800; color: var(--text3);
-    margin-bottom: 3px; letter-spacing: 0.04em;
-  }
-  .chat-msg.mine .chat-msg-meta { text-align: right; }
-  .chat-msg-bubble {
-    padding: 9px 13px; border-radius: 16px;
-    font-size: 14px; font-weight: 600; line-height: 1.45;
-    word-break: break-word;
-  }
-  .chat-msg.mine .chat-msg-bubble {
-    background: var(--chat-mine); color: var(--chat-mine-text);
-    border-radius: 16px 16px 4px 16px;
-  }
-  .chat-msg.theirs .chat-msg-bubble {
-    background: var(--chat-other); color: var(--chat-other-text);
-    border: 1.5px solid var(--border);
-    border-radius: 16px 16px 16px 4px;
-  }
-  .chat-msg-time {
-    font-size: 10px; color: var(--text3); font-family: var(--mono);
-    margin-top: 3px; font-weight: 500;
-  }
+.small{
+    width:45px;
+    height:45px;
+    left:150px;
+    top:78px;
+    animation:spin 5s linear infinite;
+}
 
-  /* System messages */
-  .chat-system-msg {
-    text-align: center; font-size: 11px; font-weight: 700;
-    color: var(--text3); padding: 4px 0;
-    letter-spacing: 0.03em;
-  }
+@keyframes spin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
 
-  /* Empty state */
-  .chat-empty {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 6px; color: var(--text3); padding: 20px;
-  }
-  .chat-empty-icon { font-size: 28px; }
-  .chat-empty-text { font-size: 13px; font-weight: 700; }
+@keyframes spin-reverse{
+    from{transform:rotate(360deg);}
+    to{transform:rotate(0deg);}
+}
 
-  /* Input area */
-  .chat-input-area {
-    padding: 12px 12px 14px;
-    border-top: 1.5px solid var(--border);
-    display: flex; gap: 8px; align-items: flex-end;
-  }
-  .chat-input {
-    flex: 1; padding: 10px 14px; border-radius: 14px;
-    border: 1.5px solid var(--border2); background: var(--bg3);
-    font-family: var(--font); font-size: 14px; font-weight: 600;
-    color: var(--text); outline: none; resize: none;
-    max-height: 100px; min-height: 40px; line-height: 1.4;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .chat-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
-  }
-  .chat-send-btn {
-    width: 40px; height: 40px; border-radius: 12px;
-    background: var(--accent); color: var(--accent-inv);
-    border: none; cursor: pointer; font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, opacity 0.2s;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
-  }
-  .chat-send-btn:hover { transform: scale(1.1); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
-  .chat-send-btn:active { transform: scale(0.92); }
-  .chat-send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.title{
+    margin-top:25px;
+    font-size:1.8rem;
+    font-weight:600;
+    letter-spacing:1px;
+}
 
-  /* Username chip in header */
-  .chat-user-chip {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--bg3); border: 1.5px solid var(--border);
-    border-radius: 999px; padding: 4px 10px 4px 8px;
-    font-size: 12px; font-weight: 800; color: var(--text2);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .chat-user-chip:hover { transform: scale(1.04); box-shadow: var(--card-shadow-hover); }
-  .chat-user-avatar {
-    width: 18px; height: 18px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 900;
-    flex-shrink: 0;
-  }
+.subtitle{
+    margin-top:8px;
+    color:#9ca3af;
+    font-size:.9rem;
+}
 
-  @keyframes msgSlideIn {
-    0% { opacity:0; transform: translateY(10px) scale(0.95); }
-    60% { opacity:1; transform: translateY(-2px) scale(1.01); }
-    100% { transform: translateY(0) scale(1); }
-  }
+.dots::after{
+    content:"";
+    animation:dots 2s infinite;
+}
 
-  /* ── Typing indicator ── */
-  .chat-typing-row {
-    display: flex; align-items: center; gap: 7px;
-    padding: 4px 2px 2px;
-    min-height: 28px;
-    animation: msgSlideIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
-  .chat-typing-names {
-    font-size: 11px; font-weight: 800; color: var(--text3);
-    letter-spacing: 0.02em;
-  }
-  .chat-typing-bubble {
-    display: flex; align-items: center; gap: 3px;
-    background: var(--bg3); border: 1.5px solid var(--border);
-    border-radius: 12px 12px 12px 4px;
-    padding: 6px 10px;
-  }
-  .chat-typing-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--text3);
-    animation: typingBounce 1.2s ease-in-out infinite;
-  }
-  .chat-typing-dot:nth-child(2) { animation-delay: 0.18s; }
-  .chat-typing-dot:nth-child(3) { animation-delay: 0.36s; }
-  @keyframes typingBounce {
-    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
-    30%         { transform: translateY(-5px); opacity: 1; }
-  }
-
-  /* ══ MODALS ══ */
-  .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);z-index:100;align-items:flex-end;justify-content:center; }
-  .modal-overlay.open { display:flex;animation:fadeIn 0.2s ease; }
-  .modal { background:var(--bg2);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:24px 20px 40px;border-top:1.5px solid var(--border);box-shadow:0 -8px 40px rgba(0,0,0,0.15);animation:slideUpModal 0.35s cubic-bezier(0.34,1.56,0.64,1); }
-  .modal-handle { width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 22px; }
-  .modal-title { font-size:20px;font-weight:900;color:var(--text);margin-bottom:5px; }
-  .modal-sub { font-size:13px;color:var(--text3);margin-bottom:20px;font-weight:600; }
-  .modal-elective-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
-  .modal-elective-btn { padding:14px 12px;border-radius:14px;border:2px solid var(--border);background:var(--bg3);font-size:14px;font-weight:800;color:var(--text2);cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;font-family:var(--font);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s,background 0.2s,border-color 0.2s,color 0.2s; }
-  .modal-elective-btn .ei { font-size:20px; }
-  .modal-elective-btn.selected { border-color:var(--accent);background:var(--accent);color:var(--accent-inv);transform:scale(1.04);box-shadow:0 4px 16px rgba(0,0,0,0.12); }
-  .modal-elective-btn:hover:not(.selected) { transform:translateY(-3px) scale(1.02);box-shadow:var(--card-shadow-hover);border-color:var(--border2); }
-  .modal-save { width:100%;margin-top:18px;padding:15px;border-radius:14px;background:var(--accent);color:var(--accent-inv);font-size:15px;font-weight:900;border:none;cursor:pointer;font-family:var(--font);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.2s;box-shadow:0 4px 14px rgba(0,0,0,0.12); }
-  .modal-save:hover { transform:translateY(-3px) scale(1.03);box-shadow:0 10px 28px rgba(0,0,0,0.2); }
-
-  /* ══ FOOTER ══ */
-  .footer { margin-top:28px;padding-top:16px;border-top:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;gap:7px; margin-bottom: 24px; }
-  .footer-text { font-size:12px;color:var(--text3);font-weight:700; }
-  .footer-code { font-size:13px;color:var(--text3);font-weight:700;font-family:var(--mono); }
-
-  /* ══ ANIMATIONS ══ */
-  @keyframes logoBounce { 0%{opacity:0;transform:scale(0.4) translateY(30px)} 60%{opacity:1;transform:scale(1.15) translateY(-8px)} 80%{transform:scale(0.95) translateY(3px)} 100%{transform:scale(1) translateY(0)} }
-  @keyframes slideDown { 0%{opacity:0;transform:translateY(-30px) scale(0.95)} 60%{opacity:1;transform:translateY(6px) scale(1.02)} 80%{transform:translateY(-3px) scale(0.99)} 100%{transform:translateY(0) scale(1)} }
-  @keyframes slideUp { 0%{opacity:0;transform:translateY(30px) scale(0.95)} 60%{opacity:1;transform:translateY(-6px) scale(1.02)} 80%{transform:translateY(3px) scale(0.99)} 100%{transform:translateY(0) scale(1)} }
-  @keyframes bounceIn { 0%{opacity:0;transform:scale(0.6) translateY(20px)} 50%{opacity:1;transform:scale(1.08) translateY(-6px)} 70%{transform:scale(0.96) translateY(3px)} 85%{transform:scale(1.03) translateY(-2px)} 100%{transform:scale(1) translateY(0)} }
-  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-  @keyframes slideUpModal { 0%{transform:translateY(80px) scale(0.97);opacity:0} 60%{transform:translateY(-8px) scale(1.01);opacity:1} 80%{transform:translateY(4px) scale(0.995)} 100%{transform:translateY(0) scale(1)} }
-  @keyframes popPulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(0,0,0,0)} 50%{transform:scale(1.12);box-shadow:0 0 0 4px rgba(0,0,0,0.1)} }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
+@keyframes dots{
+    0%{content:"";}
+    33%{content:".";}
+    66%{content:"..";}
+    100%{content:"...";}
+}
 </style>
 </head>
 <body>
 
-<canvas id="bg-canvas" aria-hidden="true"></canvas>
+<div class="container">
 
-<!-- ══ ENTRANCE SCREEN ══ -->
-<div class="screen" id="entrance-screen">
-  <div class="entrance-inner">
-    <div class="entrance-logo">📅</div>
-    <div class="entrance-title">My Schedule</div>
-    <div class="entrance-sub">P.S./I.S. 104 · Select your class to get started</div>
-    <button class="whats-new-btn" onclick="openWhatsNew()">
-      <div class="whats-new-dot"></div>
-      What's new
-    </button>
-    <div class="class-grid" id="class-grid"></div>
-    <button class="entrance-continue" id="entrance-continue-btn" onclick="goToElective()">Continue →</button>
-    <div id="summer-mini" style="display:none;text-align:center;margin-top:4px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.07em;text-transform:uppercase;">☀️ Summer break in</div>
-      <div id="summer-mini-val" style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--text2);margin-top:2px;">--d --h --m --s</div>
-    </div>
-    <div class="entrance-theme-row">
-      <button class="entrance-theme-btn" id="entrance-theme-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
-    </div>
-  </div>
-</div>
+    <div class="gear-system">
 
-<!-- ══ ELECTIVE SCREEN ══ -->
-<div class="screen hidden" id="elective-screen">
-  <div class="elective-inner">
-    <button class="elective-back" onclick="goBack('elective-screen','entrance-screen')">← Back</button>
-    <div class="elective-emoji">🎯</div>
-    <div class="elective-title">Pick Your Elective</div>
-    <div class="elective-sub">This shows up as Period 3 on Mon – Thu</div>
-    <div class="elective-grid" id="elective-pick-grid"></div>
-    <button class="elective-continue" onclick="goToLoading()">View My Schedule →</button>
-  </div>
-</div>
-
-<!-- ══ LOADING SCREEN ══ -->
-<div class="screen hidden" id="loading-screen">
-  <div class="loading-canvas-wrap">
-    <canvas id="balance-canvas" width="220" height="220"></canvas>
-  </div>
-  <div class="loading-label" id="loading-label">Setting things up…</div>
-  <div class="loading-bar-wrap"><div class="loading-bar-fill" id="loading-bar-fill"></div></div>
-  <div class="loading-dots">
-    <div class="loading-dot"></div>
-    <div class="loading-dot"></div>
-    <div class="loading-dot"></div>
-  </div>
-</div>
-
-<!-- ══ MAIN SCHEDULE APP ══ -->
-<div id="app-screen" class="hidden gone">
-  <div class="app">
-    <div class="header">
-      <div class="header-left">
-        <div class="school-name" id="app-school-name">P.S./I.S. 104 · Grade 6 · Class 601</div>
-        <div class="app-title">My Schedule</div>
-      </div>
-      <div class="header-right">
-        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
-        <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
-      </div>
-    </div>
-    <div class="status-bar">
-      <div class="time-display" id="clock"></div>
-      <div class="status-right">
-        <div id="online-status"></div>
-        <div class="runtime-badge" id="runtime-badge">↑ 0s</div>
-      </div>
-    </div>
-    <div id="current-section"></div>
-    <div id="next-section"></div>
-    <div class="day-tabs" id="day-tabs"></div>
-    <div class="schedule-list" id="schedule-list"></div>
-
-    <div id="app-summer-countdown" style="text-align:center;padding:14px 16px 4px;display:none;">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">☀️ Summer break in</div>
-      <div id="app-summer-val" style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text2);letter-spacing:0.03em;">--d --h --m --s</div>
-    </div>
-
-    <!-- ══ CHAT SECTION ══ -->
-    <div class="chat-section" id="chat-section" style="margin-top:20px;">
-      <!-- Header -->
-      <div class="chat-header">
-        <div class="chat-header-left">
-          <div>
-            <div class="chat-title">💬 Class Chat</div>
-            <div class="chat-subtitle">6-208 · Class 601</div>
-          </div>
+        <div class="gear large">
+            <div class="teeth">
+                <div class="tooth" style="transform:rotate(0deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(30deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(60deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(90deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(120deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(150deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(180deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(210deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(240deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(270deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(300deg) translateY(-52px)"></div>
+                <div class="tooth" style="transform:rotate(330deg) translateY(-52px)"></div>
+            </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div id="chat-user-chip" style="display:none;" onclick="promptRename()"></div>
-          <div class="chat-conn-badge connecting" id="chat-conn-badge">
-            <div class="chat-conn-dot"></div>
-            <span id="chat-conn-text">Connecting…</span>
-          </div>
+
+        <div class="gear medium">
+            <div class="teeth">
+                <div class="tooth" style="transform:rotate(0deg) translateY(-38px)"></div>
+                <div class="tooth" style="transform:rotate(45deg) translateY(-38px)"></div>
+                <div class="tooth" style="transform:rotate(90deg) translateY(-38px)"></div>
+                <div class="tooth" style="transform:rotate(135deg) translateY(-38px)"></div>
+                <div class="tooth" style="transform:rotate(180deg) translateY(-38px)"></div>
+                <div class="tooth" style="transform:rotate(225deg) translateY(-38px)"></div>
+                <div class="tooth" style="transform:rotate(270deg) translateY(-38px)"></div>
+                <div class="tooth" style="transform:rotate(315deg) translateY(-38px)"></div>
+            </div>
         </div>
-      </div>
 
-      <!-- Username Prompt (shown if no username yet) -->
-      <div class="chat-username-prompt" id="chat-username-prompt">
-        <div class="chat-username-label">👋 Pick a username to join the chat</div>
-        <div class="chat-username-row">
-          <input class="chat-username-input" id="chat-username-input" type="text" placeholder="Your name…" maxlength="20" />
-          <button class="chat-username-btn" onclick="setUsername()">Join</button>
+        <div class="gear small">
+            <div class="teeth">
+                <div class="tooth" style="transform:rotate(0deg) translateY(-28px)"></div>
+                <div class="tooth" style="transform:rotate(60deg) translateY(-28px)"></div>
+                <div class="tooth" style="transform:rotate(120deg) translateY(-28px)"></div>
+                <div class="tooth" style="transform:rotate(180deg) translateY(-28px)"></div>
+                <div class="tooth" style="transform:rotate(240deg) translateY(-28px)"></div>
+                <div class="tooth" style="transform:rotate(300deg) translateY(-28px)"></div>
+            </div>
         </div>
-      </div>
 
-      <!-- Messages -->
-      <div class="chat-messages" id="chat-messages">
-        <div class="chat-empty" id="chat-empty">
-          <div class="chat-empty-icon">💬</div>
-          <div class="chat-empty-text">No messages yet — say hi!</div>
-        </div>
-      </div>
-
-      <!-- Typing indicator -->
-      <div id="chat-typing-indicator" style="display:none; padding: 0 12px 6px;"></div>
-
-      <!-- Input -->
-      <div class="chat-input-area" id="chat-input-area" style="display:none;">
-        <textarea class="chat-input" id="chat-input" placeholder="Message Class 601…" rows="1" maxlength="500"></textarea>
-        <button class="chat-send-btn" id="chat-send-btn" onclick="sendMessage()" title="Send">
-          ↑
-        </button>
-      </div>
     </div>
 
-    <div class="footer">
-      <span class="footer-code">&lt;/&gt;</span>
-      <span class="footer-text">Coded by Berk</span>
+    <div class="title">Maintenance Break</div>
+    <div class="subtitle">
+        We’ll be back shortly<span class="dots"></span>
     </div>
-  </div>
+
 </div>
 
-<!-- ══ SUMMER BREAK SCREEN ══ -->
-<div class="screen hidden gone" id="summer-screen">
-  <div class="entrance-inner" style="gap:18px;text-align:center;">
-    <div style="font-size:64px;line-height:1;">☀️</div>
-    <div class="entrance-title" style="font-size:28px;">Summer Break!</div>
-    <div class="entrance-sub">School's out! enjoy every second 🎉</div>
-    <div style="background:var(--bg2);border-radius:20px;padding:24px 32px;box-shadow:var(--card-shadow);margin-top:8px;">
-      <div style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">7th grade starts in</div>
-      <div id="summer-countdown" style="font-family:var(--mono);font-size:32px;font-weight:700;color:var(--text);letter-spacing:0.04em;">--d --h --m --s</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:6px;">September 10</div>
-    </div>
-    <div class="entrance-theme-row" style="margin-top:4px;">
-      <button class="entrance-theme-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ 7TH GRADE COMING SOON ══ -->
-<div class="screen hidden gone" id="comingsoon-screen">
-  <div class="entrance-inner" style="gap:18px;text-align:center;">
-    <div style="font-size:64px;line-height:1;">🚀</div>
-    <div class="entrance-title" style="font-size:28px;">7th Grade</div>
-    <div class="entrance-sub">Schedule coming soon — check back closer to the first day!</div>
-    <div style="background:var(--bg2);border-radius:20px;padding:20px 28px;box-shadow:var(--card-shadow);margin-top:8px;">
-      <div style="font-size:13px;font-weight:700;color:var(--text3);">In Development</div>
-      <div style="font-size:13px;color:var(--text2);margin-top:6px;">New schedule will be added before school starts</div>
-    </div>
-    <div class="entrance-theme-row" style="margin-top:4px;">
-      <button class="entrance-theme-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
-    </div>
-  </div>
-</div>
-
-<!-- WHAT'S NEW MODAL -->
-<div class="wn-overlay" id="wn-overlay" onclick="closeWhatsNew(event)">
-  <div class="wn-modal">
-    <div class="wn-handle"></div>
-    <div class="wn-title">What's New</div>
-    <div class="wn-subtitle">Here's what got added recently</div>
-    <div class="wn-item">
-      <div class="wn-icon">💬</div>
-      <div>
-        <div class="wn-item-title">Live Class Chat</div>
-        <div class="wn-item-desc">Real-time chat for Class 601 powered by Firebase. Pick a username and message your classmates instantly with online, offline, and connecting indicators.</div>
-      </div>
-    </div>
-    <div class="wn-item">
-      <div class="wn-icon">☀️</div>
-      <div>
-        <div class="wn-item-title">Summer Break Screen</div>
-        <div class="wn-item-desc">When school's out, the app locks and shows a live countdown to September 10.</div>
-      </div>
-    </div>
-    <div class="wn-item">
-      <div class="wn-icon">🚀</div>
-      <div>
-        <div class="wn-item-title">7th Grade Coming Soon</div>
-        <div class="wn-item-desc">After summer, the app shows a "coming soon" page while the new schedule gets set up for 7th grade.</div>
-      </div>
-    </div>
-    <div class="wn-item">
-      <div class="wn-icon">⏳</div>
-      <div>
-        <div class="wn-item-title">Summer Countdown in the App</div>
-        <div class="wn-item-desc">A live timer at the bottom of the schedule ticks down the days, hours, minutes, and seconds until summer break.</div>
-      </div>
-    </div>
-    <div class="wn-item">
-      <div class="wn-icon">👋</div>
-      <div>
-        <div class="wn-item-title">See You Next Week</div>
-        <div class="wn-item-desc">On Fridays after school, instead of "See you tomorrow" it now says "See you next week!" — because, well, it's the weekend.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- SETTINGS MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Settings</div>
-    <div class="modal-sub">Change your elective</div>
-    <div class="modal-elective-grid" id="modal-elective-grid"></div>
-    <button class="modal-save" onclick="saveSettings()">Save</button>
-  </div>
-</div>
-
-<!-- Firebase SDKs -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, serverTimestamp, onDisconnect, set, onChildAdded, limitToLast, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDWtxb7IsZmAMZs0oGmryp3vumu6jWhNpM",
-  authDomain: "schedule-d9e6d.firebaseapp.com",
-  databaseURL: "https://schedule-d9e6d-default-rtdb.firebaseio.com",
-  projectId: "schedule-d9e6d",
-  storageBucket: "schedule-d9e6d.firebasestorage.app",
-  messagingSenderId: "292184337443",
-  appId: "1:292184337443:web:4c76a5f1f70887692fd596",
-  measurementId: "G-RDQDG64HVP"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
-
-window._firebaseDb   = db;
-window._firebaseRef  = ref;
-window._firebasePush = push;
-window._firebaseServerTimestamp = serverTimestamp;
-window._firebaseOnChildAdded = onChildAdded;
-window._firebaseLimitToLast  = limitToLast;
-window._firebaseQuery        = query;
-window._firebaseOnValue      = onValue;
-window._firebaseSet          = set;
-
-const connRef = ref(db, '.info/connected');
-onValue(connRef, (snap) => {
-  const connected = snap.val();
-  setChatConnStatus(connected ? 'online' : 'offline');
-});
-
-const messagesRef = ref(db, 'chat/601');
-const recentQ = query(messagesRef, limitToLast(80));
-
-let firstLoad = true;
-let loadedKeys = new Set();
-
-onValue(recentQ, (snap) => {
-  if (firstLoad) {
-    firstLoad = false;
-    const msgs = [];
-    snap.forEach(child => {
-      msgs.push({ key: child.key, ...child.val() });
-      loadedKeys.add(child.key);
-    });
-    window._renderMessages(msgs, true);
-  }
-});
-
-onChildAdded(recentQ, (snap) => {
-  if (loadedKeys.has(snap.key)) return;
-  loadedKeys.add(snap.key);
-  window._renderMessages([{ key: snap.key, ...snap.val() }], false);
-});
-
-const typingRef = ref(db, 'typing/601');
-onValue(typingRef, (snap) => {
-  const data = snap.val() || {};
-  const myName = window._chatUsername ? window._chatUsername() : '';
-  const now = Date.now();
-  const typers = Object.entries(data)
-    .filter(([name, info]) => name !== myName && info.ts && (now - info.ts) < 8000)
-    .map(([name]) => name);
-  window._renderTyping(typers);
-});
-
-window._setTyping = function(username, isTyping) {
-  if (!username) return;
-  const userTypingRef = ref(db, `typing/601/${username}`);
-  if (isTyping) {
-    set(userTypingRef, { ts: Date.now() });
-  } else {
-    set(userTypingRef, null);
-  }
-};
-
-setChatConnStatus('connecting');
-
-function setChatConnStatus(status) {
-  const badge = document.getElementById('chat-conn-badge');
-  const text  = document.getElementById('chat-conn-text');
-  if (!badge || !text) return;
-  badge.className = `chat-conn-badge ${status}`;
-  text.textContent = status === 'online' ? 'Online' : status === 'offline' ? 'Offline' : 'Connecting…';
-}
-window._setChatConnStatus = setChatConnStatus;
-</script>
-
-<script>
-/* ════════════════════════════════════════
-   CONSTANTS & STATE
-════════════════════════════════════════ */
-const DAYS    = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
-const toMins  = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
-
-const CLASSES = [
-  { id:'601', label:'Class 601', grade:'Grade 6', available: true },
-];
-
-const ELECTIVES = [
-  { name:'Math Olympiad Elective', icon:'🏅' },
-  { name:'Science Elective',       icon:'🔬' },
-  { name:'Nutrition Elective',     icon:'🥗' },
-  { name:'Coding Elective',        icon:'💻' },
-  { name:'Journalism Elective',    icon:'📰' },
-];
-
-const COLORS = ['#7F77DD','#1D9E75','#D85A30','#D4537E','#378ADD','#639922','#BA7517','#E24B4A'];
-const AVATAR_COLORS = ['#7F77DD','#1D9E75','#D85A30','#D4537E','#378ADD','#639922','#BA7517','#E24B4A','#8B5CF6','#EC4899'];
-
-let selectedClass    = localStorage.getItem('selectedClass')    || '601';
-let selectedElective = localStorage.getItem('selectedElective') || 'Math Olympiad Elective';
-let pendingElective  = selectedElective;
-let isDark           = localStorage.getItem('darkMode') === 'true';
-let selectedDay      = null;
-const startTime      = Date.now();
-
-let chatUsername = localStorage.getItem('chatUsername') || '';
-let chatMessages = [];
-let typingTimeout = null;
-let isCurrentlyTyping = false;
-
-window._chatUsername = () => chatUsername;
-
-document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-
-/* ════════════════════════════════════════
-   AVATAR COLOR
-════════════════════════════════════════ */
-function avatarColor(name) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-function avatarInitial(name) { return name ? name[0].toUpperCase() : '?'; }
-
-/* ════════════════════════════════════════
-   THEME
-════════════════════════════════════════ */
-function toggleTheme() {
-  isDark = !isDark;
-  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  localStorage.setItem('darkMode', isDark);
-  ['theme-btn','entrance-theme-btn'].forEach(id => {
-    const b = document.getElementById(id); if (b) b.textContent = isDark ? '☀️' : '🌙';
-  });
-}
-function syncThemeIcons() {
-  ['theme-btn','entrance-theme-btn'].forEach(id => {
-    const b = document.getElementById(id); if (b) b.textContent = isDark ? '☀️' : '🌙';
-  });
-}
-
-/* ════════════════════════════════════════
-   SCREEN NAVIGATION
-════════════════════════════════════════ */
-function showScreen(id) {
-  document.querySelectorAll('.screen, #app-screen').forEach(s => {
-    s.classList.add('hidden'); s.classList.remove('gone');
-  });
-  setTimeout(() => {
-    document.querySelectorAll('.screen, #app-screen').forEach(s => {
-      if (s.id !== id) s.classList.add('gone');
-    });
-    const target = document.getElementById(id);
-    target.classList.remove('gone');
-    requestAnimationFrame(() => target.classList.remove('hidden'));
-  }, 500);
-}
-
-function goToElective()       { buildElectivePicker(); showScreen('elective-screen'); }
-function goBack(fromId, toId) { showScreen(toId); }
-function goToLoading() {
-  localStorage.setItem('selectedElective', selectedElective);
-  localStorage.setItem('selectedClass', selectedClass);
-  showScreen('loading-screen');
-  startLoadingAnim();
-}
-
-function goToApp() {
-  document.querySelectorAll('.screen').forEach(s => { s.classList.add('hidden'); s.classList.add('gone'); });
-  const app = document.getElementById('app-screen');
-  app.classList.remove('gone');
-  requestAnimationFrame(() => app.classList.remove('hidden'));
-  syncThemeIcons();
-  render();
-  setInterval(render, 1000);
-  setTimeout(runIntro, 100);
-  initChat();
-
-  const SUMMER_START = new Date('2026-06-26T14:25:00-04:00');
-  const banner = document.getElementById('app-summer-countdown');
-  const valEl  = document.getElementById('app-summer-val');
-  function tickApp() {
-    const diff = Math.max(0, SUMMER_START - getNYTime());
-    if (diff <= 0) { if (banner) banner.style.display = 'none'; return; }
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    if (valEl) valEl.textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
-  }
-  if (banner) banner.style.display = 'block';
-  tickApp(); setInterval(tickApp, 1000);
-}
-
-/* ════════════════════════════════════════
-   ENTRANCE
-════════════════════════════════════════ */
-function buildEntrance() {
-  const grid = document.getElementById('class-grid');
-  grid.innerHTML = CLASSES.map((c, i) => `
-    <button class="class-btn${c.available && c.id === selectedClass ? ' active-class' : ''}"
-      style="animation-delay:${0.35 + i*0.08}s"
-      onclick="pickClass('${c.id}')">
-      <div class="class-btn-label">${c.grade}</div>
-      <div>6-208</div>
-      <div class="class-btn-label" style="opacity:0.5;margin-top:2px">Homeroom 601</div>
-    </button>`).join('');
-  grid.insertAdjacentHTML('afterend', '<div style="width:100%;text-align:center;font-size:12px;font-weight:700;color:var(--text3);margin-top:6px;letter-spacing:0.04em;">More classes coming soon</div>');
-}
-
-function pickClass(id) {
-  selectedClass = id;
-  document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('active-class'));
-  document.querySelectorAll('.class-btn').forEach(b => {
-    if (b.textContent.includes(CLASSES.find(c => c.id === id).label)) b.classList.add('active-class');
-  });
-}
-
-/* ════════════════════════════════════════
-   ELECTIVE PICKER
-════════════════════════════════════════ */
-function buildElectivePicker() {
-  const grid = document.getElementById('elective-pick-grid');
-  grid.innerHTML = ELECTIVES.map(e => `
-    <button class="elective-btn${e.name === selectedElective ? ' selected' : ''}" onclick="pickElectiveOnboard('${e.name}')">
-      <span class="ei">${e.icon}</span>${e.name}
-    </button>`).join('');
-}
-function pickElectiveOnboard(name) {
-  selectedElective = name;
-  document.querySelectorAll('#elective-pick-grid .elective-btn').forEach(b => {
-    b.classList.toggle('selected', b.textContent.trim().includes(name));
-  });
-}
-
-/* ════════════════════════════════════════
-   LOADING ANIMATION
-════════════════════════════════════════ */
-const LOADING_MESSAGES = ['Setting things up…','Loading your classes…','just wait bruv','Almost there…','Ready!'];
-
-function startLoadingAnim() {
-  const bar   = document.getElementById('loading-bar-fill');
-  const label = document.getElementById('loading-label');
-  bar.style.width = '0%';
-  const totalMs = 2400, startT = performance.now();
-  function tick(now) {
-    const elapsed = now - startT;
-    const pct = Math.min(100, (elapsed / totalMs) * 100);
-    bar.style.width = pct.toFixed(1) + '%';
-    label.textContent = LOADING_MESSAGES[Math.min(LOADING_MESSAGES.length - 1, Math.floor((pct / 100) * LOADING_MESSAGES.length))];
-    if (pct < 100) { requestAnimationFrame(tick); } else { setTimeout(goToApp, 300); }
-  }
-  requestAnimationFrame(tick);
-  startBalancingAnim();
-}
-
-function startBalancingAnim() {
-  const canvas = document.getElementById('balance-canvas');
-  const ctx = canvas.getContext('2d');
-  const W = 220, H = 220, cx = W/2, cy = H/2;
-  const LIGHT = ['rgba(127,119,221,0.75)','rgba(29,158,117,0.7)','rgba(216,90,48,0.7)','rgba(212,83,126,0.7)','rgba(55,138,221,0.75)','rgba(100,153,34,0.7)','rgba(186,117,23,0.7)'];
-  const DARK  = ['rgba(127,119,221,0.55)','rgba(29,158,117,0.5)','rgba(216,90,48,0.5)','rgba(212,83,126,0.5)','rgba(55,138,221,0.55)','rgba(100,153,34,0.5)','rgba(186,117,23,0.5)'];
-  const getC  = () => isDark ? DARK : LIGHT;
-  const shapes = [
-    {type:'circle',   size:28, angle:0,    r:72, speed:0.013,  phase:0,   colorIdx:0},
-    {type:'square',   size:22, angle:2.09, r:72, speed:-0.009, phase:1.1, colorIdx:1},
-    {type:'triangle', size:24, angle:4.19, r:72, speed:0.011,  phase:2.2, colorIdx:2},
-    {type:'diamond',  size:20, angle:1.05, r:48, speed:-0.017, phase:0.5, colorIdx:3},
-    {type:'circle',   size:16, angle:3.14, r:48, speed:0.021,  phase:1.7, colorIdx:4},
-    {type:'square',   size:18, angle:5.24, r:48, speed:-0.014, phase:3.0, colorIdx:5},
-    {type:'pentagon', size:26, angle:0.52, r:88, speed:0.008,  phase:0.9, colorIdx:6},
-    {type:'triangle', size:14, angle:3.67, r:88, speed:-0.012, phase:2.5, colorIdx:0},
-  ];
-  const core = {pulseT: 0};
-  function drawShape(ctx, type, x, y, size, rotation, color) {
-    ctx.save(); ctx.translate(x, y); ctx.rotate(rotation); ctx.fillStyle = color; ctx.beginPath();
-    const r = size / 2;
-    switch(type) {
-      case 'circle':   ctx.arc(0,0,r,0,Math.PI*2); break;
-      case 'square':   ctx.roundRect(-r,-r,size,size,r*0.22); break;
-      case 'diamond':  ctx.moveTo(0,-r*1.1); ctx.lineTo(r*0.75,0); ctx.lineTo(0,r*1.1); ctx.lineTo(-r*0.75,0); ctx.closePath(); break;
-      case 'triangle': ctx.moveTo(0,-r); ctx.lineTo(r*0.87,r*0.5); ctx.lineTo(-r*0.87,r*0.5); ctx.closePath(); break;
-      case 'pentagon': for(let j=0;j<5;j++){const a=(j*Math.PI*2)/5-Math.PI/2;j===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);} ctx.closePath(); break;
-    }
-    ctx.fill(); ctx.restore();
-  }
-  let t = 0, rafId;
-  function frame() {
-    ctx.clearRect(0, 0, W, H); const cols = getC(); t += 0.016;
-    ctx.save(); ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'; ctx.lineWidth = 1;
-    for (const s of shapes) { const x = cx + Math.cos(s.angle)*s.r; const y = cy + Math.sin(s.angle)*s.r; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke(); } ctx.restore();
-    for (const s of shapes) { s.angle += s.speed; const x = cx + Math.cos(s.angle)*s.r; const y = cy + Math.sin(s.angle)*s.r + Math.sin(t*1.5+s.phase)*7; drawShape(ctx, s.type, x, y, s.size, t*(s.speed>0?0.4:-0.4), cols[s.colorIdx]); }
-    core.pulseT += 0.04; const pulse = 1 + Math.sin(core.pulseT)*0.12;
-    ctx.save(); ctx.translate(cx,cy); ctx.fillStyle = isDark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)'; ctx.beginPath(); ctx.arc(0,0,18*pulse,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = isDark?'rgba(255,255,255,0.6)':'rgba(26,25,22,0.7)'; ctx.font='bold 18px Nunito,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('📅',0,0); ctx.restore();
-    rafId = requestAnimationFrame(frame);
-  }
-  frame();
-  const obs = new MutationObserver(() => {
-    const ls = document.getElementById('loading-screen');
-    if (ls.classList.contains('hidden') || ls.classList.contains('gone')) { cancelAnimationFrame(rafId); obs.disconnect(); }
-  });
-  obs.observe(document.getElementById('loading-screen'), {attributes:true, attributeFilter:['class']});
-}
-
-/* ════════════════════════════════════════
-   BACKGROUND CANVAS
-════════════════════════════════════════ */
-(function() {
-  const canvas = document.getElementById('bg-canvas');
-  const ctx = canvas.getContext('2d');
-  const LC = ['rgba(255,190,80,0.18)','rgba(120,180,255,0.18)','rgba(200,130,255,0.15)','rgba(80,210,170,0.16)','rgba(255,120,140,0.14)','rgba(100,210,100,0.15)'];
-  const DC = ['rgba(255,160,50,0.13)','rgba(80,140,255,0.12)','rgba(180,70,255,0.1)','rgba(40,200,150,0.11)','rgba(255,80,110,0.1)','rgba(60,200,80,0.11)'];
-  const TYPES = ['circle','triangle','square','diamond','pentagon'];
-  let W, H, shapes;
-  const getColors = () => document.documentElement.getAttribute('data-theme')==='dark' ? DC : LC;
-  const rb = (a,b) => a + Math.random()*(b-a);
-  function makeShape(i) { const size=rb(28,72),spd=rb(0.4,1.1),ang=Math.random()*Math.PI*2; return {x:rb(size,W-size),y:rb(size,H-size),vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,size,type:TYPES[i%TYPES.length],colorIdx:i%LC.length,rotation:Math.random()*Math.PI*2,rotSpeed:rb(-0.008,0.008)}; }
-  function drawShape(s,color) { ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.rotation);ctx.fillStyle=color;ctx.beginPath();const r=s.size/2;switch(s.type){case'circle':ctx.arc(0,0,r,0,Math.PI*2);break;case'square':ctx.roundRect(-r,-r,s.size,s.size,r*0.22);break;case'diamond':ctx.moveTo(0,-r*1.1);ctx.lineTo(r*0.75,0);ctx.lineTo(0,r*1.1);ctx.lineTo(-r*0.75,0);ctx.closePath();break;case'triangle':ctx.moveTo(0,-r);ctx.lineTo(r*0.87,r*0.5);ctx.lineTo(-r*0.87,r*0.5);ctx.closePath();break;case'pentagon':{for(let j=0;j<5;j++){const a=(j*Math.PI*2)/5-Math.PI/2;j===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();break;}}ctx.fill();ctx.restore(); }
-  function resize() { W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; shapes=Array.from({length:9},(_,i)=>makeShape(i)); }
-  function tick() { ctx.clearRect(0,0,W,H);const cols=getColors();for(const s of shapes){s.x+=s.vx;s.y+=s.vy;s.rotation+=s.rotSpeed;const h=s.size/2;if(s.x-h<0){s.x=h;s.vx=Math.abs(s.vx);}if(s.x+h>W){s.x=W-h;s.vx=-Math.abs(s.vx);}if(s.y-h<0){s.y=h;s.vy=Math.abs(s.vy);}if(s.y+h>H){s.y=H-h;s.vy=-Math.abs(s.vy);}drawShape(s,cols[s.colorIdx]);}requestAnimationFrame(tick); }
-  window.addEventListener('resize', resize); resize(); tick();
-})();
-
-/* ════════════════════════════════════════
-   SCHEDULE DATA
-════════════════════════════════════════ */
-const baseSchedule = {
-  Monday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:10',end:'8:55'},
-    {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:55',end:'9:40'},
-    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:40',end:'10:20'},
-    {p:4,name:'Chorus 6',teacher:'Castine',room:'308',start:'10:25',end:'11:10'},
-    {p:5,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'11:15',end:'12:00'},
-    {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Physical Education',teacher:'Dibbs',room:'GYM',start:'12:55',end:'13:40'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:45',end:'14:25'},
-  ],
-  Tuesday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
-    {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
-    {p:4,name:'Chorus 6',teacher:'Castine',room:'308',start:'10:35',end:'11:20'},
-    {p:5,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
-    {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Physical Education',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
-  ],
-  Wednesday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
-    {p:2,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
-    {p:4,name:'Technology 6',teacher:'Logozzo',room:'208',start:'10:35',end:'11:20'},
-    {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
-    {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Physical Education',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
-  ],
-  Thursday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
-    {p:2,name:'Health 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'__ELECTIVE__',teacher:'TBD',room:'TBD',start:'9:50',end:'10:35'},
-    {p:4,name:'Civics For All',teacher:'Zera',room:'208',start:'10:35',end:'11:20'},
-    {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
-    {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
-  ],
-  Friday:[
-    {p:1,name:'Core ELA 6',teacher:'Petrizzo',room:'208',start:'8:20',end:'9:05'},
-    {p:2,name:'Health 6',teacher:'Petrizzo',room:'208',start:'9:05',end:'9:50'},
-    {p:3,name:'Spanish 6',teacher:'Scandole',room:'208',start:'9:50',end:'10:35'},
-    {p:4,name:'Core Social Studies',teacher:'Petrizzo',room:'208',start:'10:35',end:'11:20'},
-    {p:5,name:'Core Science 6',teacher:'Petrizzo',room:'208',start:'11:20',end:'12:05'},
-    {p:6,name:'Lunch 6',teacher:'Fernandez',room:'CAF',start:'12:05',end:'12:50'},
-    {p:7,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'12:50',end:'13:35'},
-    {p:8,name:'Core Math 6',teacher:'Petrizzo',room:'208',start:'13:35',end:'14:20'},
-  ],
-};
-
-function getSchedule() {
-  const out = {};
-  for (const [day, periods] of Object.entries(baseSchedule))
-    out[day] = periods.map(p => ({...p, name: p.name === '__ELECTIVE__' ? selectedElective : p.name}));
-  return out;
-}
-
-/* ════════════════════════════════════════
-   CHAT
-════════════════════════════════════════ */
-function initChat() {
-  updateUserChip();
-  if (chatUsername) {
-    document.getElementById('chat-username-prompt').style.display = 'none';
-    document.getElementById('chat-input-area').style.display = 'flex';
-  }
-
-  document.getElementById('chat-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  });
-
-  document.getElementById('chat-input').addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-  });
-}
-
-function updateUserChip() {
-  const chip = document.getElementById('chat-user-chip');
-  if (!chip) return;
-  if (chatUsername) {
-    const color = avatarColor(chatUsername);
-    chip.style.display = 'flex';
-    chip.className = 'chat-user-chip';
-    chip.innerHTML = `<div class="chat-user-avatar" style="background:${color};color:#fff;">${avatarInitial(chatUsername)}</div>${chatUsername}`;
-  } else {
-    chip.style.display = 'none';
-  }
-}
-
-function setUsername() {
-  const input = document.getElementById('chat-username-input');
-  const name  = input.value.trim().slice(0, 20);
-  if (!name) { input.focus(); return; }
-  chatUsername = name;
-  localStorage.setItem('chatUsername', chatUsername);
-  document.getElementById('chat-username-prompt').style.display = 'none';
-  document.getElementById('chat-input-area').style.display = 'flex';
-  updateUserChip();
-  document.getElementById('chat-input').focus();
-  postSystemMessage(`${chatUsername} joined the chat 👋`);
-}
-
-function promptRename() {
-  const newName = prompt('Change your username:', chatUsername);
-  if (newName && newName.trim()) {
-    const old = chatUsername;
-    chatUsername = newName.trim().slice(0, 20);
-    localStorage.setItem('chatUsername', chatUsername);
-    updateUserChip();
-    postSystemMessage(`${old} changed name to ${chatUsername}`);
-  }
-}
-
-function postSystemMessage(text) {
-  if (!window._firebaseDb) return;
-  const db   = window._firebaseDb;
-  const ref  = window._firebaseRef;
-  const push = window._firebasePush;
-  const ts   = window._firebaseServerTimestamp;
-  push(ref(db, 'chat/601'), { type: 'system', text, ts: ts() });
-}
-
-function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const text  = input.value.trim();
-  if (!text || !chatUsername || !window._firebaseDb) return;
-
-  const db   = window._firebaseDb;
-  const ref  = window._firebaseRef;
-  const push = window._firebasePush;
-  const ts   = window._firebaseServerTimestamp;
-
-  input.value = '';
-  input.style.height = 'auto';
-  push(ref(db, 'chat/601'), {
-    type: 'message',
-    username: chatUsername,
-    text,
-    ts: ts(),
-  });
-}
-
-window._renderMessages = function(msgs, isBulk) {
-  const container = document.getElementById('chat-messages');
-  const empty     = document.getElementById('chat-empty');
-
-  if (isBulk) {
-    chatMessages = msgs;
-    container.innerHTML = '';
-    if (msgs.length === 0) {
-      container.appendChild(createEmptyState());
-    } else {
-      msgs.forEach(msg => container.appendChild(createMsgEl(msg)));
-    }
-    container.scrollTop = container.scrollHeight;
-    return;
-  }
-
-  if (empty && empty.parentNode) empty.remove();
-  msgs.forEach(msg => {
-    container.appendChild(createMsgEl(msg));
-  });
-  container.scrollTop = container.scrollHeight;
-};
-
-function createEmptyState() {
-  const div = document.createElement('div');
-  div.className = 'chat-empty'; div.id = 'chat-empty';
-  div.innerHTML = '<div class="chat-empty-icon">💬</div><div class="chat-empty-text">No messages yet — say hi!</div>';
-  return div;
-}
-
-function createMsgEl(msg) {
-  const div = document.createElement('div');
-
-  if (msg.type === 'system') {
-    div.className = 'chat-system-msg';
-    div.textContent = msg.text;
-    return div;
-  }
-
-  const isMine = msg.username === chatUsername;
-  div.className = `chat-msg ${isMine ? 'mine' : 'theirs'}`;
-
-  const color   = avatarColor(msg.username || '?');
-  const timeStr = msg.ts ? formatChatTime(msg.ts) : '';
-
-  div.innerHTML = `
-    <div class="chat-msg-meta">
-      ${!isMine ? `<span style="color:${color};font-weight:900;">${escHtml(msg.username)}</span>` : 'You'}
-    </div>
-    <div class="chat-msg-bubble">${escHtml(msg.text)}</div>
-    <div class="chat-msg-time">${timeStr}</div>
-  `;
-  return div;
-}
-
-function formatChatTime(ts) {
-  if (!ts) return '';
-  const d = new Date(ts);
-  const h = d.getHours(), m = d.getMinutes();
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  return `${h%12||12}:${String(m).padStart(2,'0')} ${ampm}`;
-}
-
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-}
-
-/* ════════════════════════════════════════
-   SCHEDULE RENDER
-════════════════════════════════════════ */
-let _lastOnline=null, _lastViewDay=null, _lastCurPeriod=null, _lastMinute=-1;
-function getNYTime() { return new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'})); }
-function getDayName(d) { return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]; }
-function fmt12(t) { const [h,m]=t.split(':').map(Number); const ampm=h>=12?'PM':'AM'; const h12=h%12||12; return `${h12}:${String(m).padStart(2,'0')} ${ampm}`; }
-function fmtCountdown(secs) { if(secs<=0)return'0:00'; const m=Math.floor(secs/60),s=secs%60; return `${m}:${String(s).padStart(2,'0')}`; }
-function fmtRuntime(ms) { const s=Math.floor(ms/1000); if(s<60)return`↑ ${s}s`; const m=Math.floor(s/60),rs=s%60; if(m<60)return`↑ ${m}m ${rs}s`; const h=Math.floor(m/60),rm=m%60; return`↑ ${h}h ${rm}m`; }
-function getCurrentPeriod(day,now,schedule) { const nm=now.getHours()*60+now.getMinutes(); if(!schedule[day])return null; for(const p of schedule[day]){if(nm>=toMins(p.start)&&nm<toMins(p.end))return p;} return null; }
-function getNextPeriod(day,now,schedule) { const nm=now.getHours()*60+now.getMinutes(); if(!schedule[day])return null; for(const p of schedule[day]){if(toMins(p.start)>nm)return p;} return null; }
-function setTextIfChanged(el,val) { if(el&&el.textContent!==val)el.textContent=val; }
-function updateOnlineStatus() {
-  const online = navigator.onLine;
-  if (online === _lastOnline) return; _lastOnline = online;
-  const el = document.getElementById('online-status');
-  el.innerHTML = online
-    ? `<div class="online-indicator"><div class="online-dot"></div>Online</div>`
-    : `<div class="offline-indicator"><div class="offline-dot"></div>Offline</div>`;
-}
-
-function fullRender(schedule,now,viewDay,realDay,isSchoolDay) {
-  const dayPeriods = schedule[viewDay] || [];
-  const isToday    = viewDay === realDay && isSchoolDay;
-  const cur  = isToday ? getCurrentPeriod(viewDay, now, schedule) : null;
-  const nxt  = isToday ? getNextPeriod(viewDay, now, schedule) : null;
-  const nowMins = now.getHours()*60 + now.getMinutes();
-
-  document.getElementById('day-tabs').innerHTML = DAYS.map(d =>
-    `<div class="day-tab${viewDay===d?' active':''}" onclick="selectDay('${d}')">${d.slice(0,3)}</div>`).join('');
-
-  const curSec = document.getElementById('current-section');
-  if (!isToday) { curSec.innerHTML=''; }
-  else if (cur) {
-    const color = COLORS[(cur.p-1)%COLORS.length];
-    const endMins=toMins(cur.end), startMins=toMins(cur.start), totalMins=endMins-startMins;
-    const elapsed = nowMins + now.getSeconds()/60 - startMins;
-    const pct = Math.min(100, Math.max(0, (elapsed/totalMins)*100));
-    const secsLeft = Math.max(0, (endMins - nowMins - now.getSeconds()/60)*60);
-    curSec.innerHTML=`<div class="current-card"><div class="accent" style="background:${color}"></div><div class="inner"><div class="period-label"><span class="dot"></span>Period ${cur.p} · now</div><div class="class-name">${cur.name}</div><div class="teacher">${cur.teacher} · Room ${cur.room}</div><div class="time-row"><div><div class="countdown" id="countdown-val">${fmtCountdown(Math.round(secsLeft))}</div><div class="countdown-label">until end</div></div><div class="time-badge">${fmt12(cur.start)} – ${fmt12(cur.end)}</div></div><div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:${pct.toFixed(2)}%;background:${color}"></div></div></div></div>`;
-  } else {
-    const firstStart = toMins(dayPeriods[0]?.start||'8:10');
-    curSec.innerHTML=`<div class="current-card"><div style="padding:4px 0"><div class="period-label">${nowMins<firstStart?"school hasn't started yet":"school's done"}</div><div class="class-name">${nowMins<firstStart?'First period at '+fmt12(dayPeriods[0]?.start||'8:10'):now.getDay()===5?'See you next week!':'See you tomorrow!'}</div></div></div>`;
-  }
-
-  const nxtSec = document.getElementById('next-section');
-  nxtSec.innerHTML = (isToday && nxt)
-    ? `<div class="next-card"><div><div class="next-label">up next · Period ${nxt.p}</div><div class="next-class">${nxt.name}</div></div><div class="next-time">${fmt12(nxt.start)}</div></div>` : '';
-
-  document.getElementById('schedule-list').innerHTML = dayPeriods.map(p => {
-    const isPast   = isToday && toMins(p.end) <= nowMins;
-    const isActive = isToday && cur && cur.p === p.p;
-    return`<div class="period-row${isActive?' active-row':isPast?' past-row':''}"><div class="period-num${isActive?' active-num':''}">${p.p}</div><div class="period-info"><div class="period-class">${p.name}</div><div class="period-teacher">${p.teacher}</div></div><div class="room-badge">Rm ${p.room}</div><div class="period-time">${fmt12(p.start)}</div>${isActive?'<div class="dot"></div>':''}</div>`;
-  }).join('');
-}
-
-function render() {
-  const schedule = getSchedule(), now = getNYTime(), realDay = getDayName(now);
-  const isSchoolDay = DAYS.includes(realDay);
-  const viewDay = selectedDay || (isSchoolDay ? realDay : 'Monday');
-  const cur = (viewDay === realDay && isSchoolDay) ? getCurrentPeriod(viewDay, now, schedule) : null;
-  const curKey = cur ? cur.p : null;
-  const minute = now.getHours()*60 + now.getMinutes();
-  const hh = String(now.getHours()).padStart(2,'0'), mm = String(now.getMinutes()).padStart(2,'0');
-  setTextIfChanged(document.getElementById('clock'), `${fmt12(hh+':'+mm)} · ${realDay}`);
-  setTextIfChanged(document.getElementById('runtime-badge'), fmtRuntime(Date.now()-startTime));
-  updateOnlineStatus();
-  if (cur) {
-    const nowMins = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60;
-    const endMins = toMins(cur.end), startMins = toMins(cur.start);
-    const secsLeft = Math.max(0, (endMins-nowMins)*60);
-    const pct = Math.min(100, Math.max(0, ((nowMins-startMins)/(endMins-startMins))*100));
-    const cdEl = document.getElementById('countdown-val'), pfEl = document.getElementById('progress-fill');
-    if (cdEl) setTextIfChanged(cdEl, fmtCountdown(Math.round(secsLeft)));
-    if (pfEl) pfEl.style.width = pct.toFixed(2) + '%';
-  }
-  if (viewDay !== _lastViewDay || curKey !== _lastCurPeriod || minute !== _lastMinute) {
-    _lastViewDay = viewDay; _lastCurPeriod = curKey; _lastMinute = minute;
-    fullRender(schedule, now, viewDay, realDay, isSchoolDay);
-  }
-}
-
-/* ════════════════════════════════════════
-   MODALS
-════════════════════════════════════════ */
-function openWhatsNew()   { document.getElementById('wn-overlay').classList.add('open'); }
-function closeWhatsNew(e) { if (e.target === document.getElementById('wn-overlay')) document.getElementById('wn-overlay').classList.remove('open'); }
-function openSettings() {
-  pendingElective = selectedElective;
-  document.getElementById('modal-elective-grid').innerHTML = ELECTIVES.map(e =>
-    `<button class="modal-elective-btn${e.name===pendingElective?' selected':''}" onclick="pickModalElective('${e.name}')"><span class="ei">${e.icon}</span>${e.name}</button>`).join('');
-  document.getElementById('modal-overlay').classList.add('open');
-}
-function pickModalElective(name) {
-  pendingElective = name;
-  document.querySelectorAll('.modal-elective-btn').forEach(b => b.classList.toggle('selected', b.textContent.trim().includes(name)));
-}
-function saveSettings() {
-  selectedElective = pendingElective;
-  localStorage.setItem('selectedElective', selectedElective);
-  document.getElementById('modal-overlay').classList.remove('open');
-  _lastViewDay = null; render();
-}
-function overlayClick(e) { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); }
-window.selectDay = function(d) { selectedDay = d; _lastViewDay = null; render(); };
-
-/* ════════════════════════════════════════
-   INTRO ANIMATION
-════════════════════════════════════════ */
-function runIntro() {
-  const els = [
-    {el: document.querySelector('.header'),              anim:'slideDown 0.7s cubic-bezier(0.34,1.56,0.64,1) both'},
-    {el: document.querySelector('.status-bar'),          anim:'slideDown 0.7s 0.08s cubic-bezier(0.34,1.56,0.64,1) both'},
-    {el: document.getElementById('current-section'),     anim:'bounceIn 0.75s 0.15s cubic-bezier(0.34,1.56,0.64,1) both'},
-    {el: document.getElementById('next-section'),        anim:'bounceIn 0.75s 0.22s cubic-bezier(0.34,1.56,0.64,1) both'},
-    {el: document.getElementById('day-tabs'),            anim:'slideUp 0.7s 0.28s cubic-bezier(0.34,1.56,0.64,1) both'},
-    {el: document.getElementById('chat-section'),        anim:'bounceIn 0.75s 0.55s cubic-bezier(0.34,1.56,0.64,1) both'},
-  ];
-  els.forEach(({el,anim}) => { if(!el)return; el.style.animation=anim; el.addEventListener('animationend',()=>el.style.animation='',{once:true}); });
-  document.querySelectorAll('.period-row').forEach((row,i) => {
-    const delay = 0.35 + i*0.07;
-    row.style.animation = `bounceIn 0.65s ${delay}s cubic-bezier(0.34,1.56,0.64,1) both`;
-    row.addEventListener('animationend', () => row.style.animation='', {once:true});
-  });
-}
-
-window.addEventListener('online',  updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-
-/* ════════════════════════════════════════
-   INIT
-════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
-  syncThemeIcons();
-  const SUMMER_START = new Date('2026-06-26T14:25:00-04:00');
-  const SUMMER_END   = new Date('2026-09-10T00:00:00-04:00');
-  const now = getNYTime();
-
-  if (now >= SUMMER_END) {
-    showScreen('comingsoon-screen'); syncThemeIcons();
-  } else if (now >= SUMMER_START) {
-    showScreen('summer-screen'); syncThemeIcons();
-    function tickSummer() {
-      const diff = Math.max(0, SUMMER_END - getNYTime());
-      const d=Math.floor(diff/86400000), h=Math.floor((diff%86400000)/3600000), m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
-      const el = document.getElementById('summer-countdown');
-      if (el) el.textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
-    }
-    tickSummer(); setInterval(tickSummer, 1000);
-  } else {
-    buildEntrance();
-    const mini = document.getElementById('summer-mini');
-    if (mini) mini.style.display = 'block';
-    function tickMini() {
-      const diff = Math.max(0, SUMMER_START - getNYTime());
-      const d=Math.floor(diff/86400000), h=Math.floor((diff%86400000)/3600000), m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
-      const el = document.getElementById('summer-mini-val');
-      if (el) el.textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
-    }
-    tickMini(); setInterval(tickMini, 1000);
-  }
-
-  if (chatUsername) {
-    const inp = document.getElementById('chat-username-input');
-    if (inp) inp.value = chatUsername;
-  }
-});
-</script>
 </body>
 </html>
