@@ -633,7 +633,14 @@ const schoolSettingsRef = ref(db, 'admin/schoolSettings');
 onValue(schoolSettingsRef, (snap) => {
   const data = snap.val() || {};
   window._schoolSettings = data;
-  if (window._applySchoolSettings) window._applySchoolSettings(data);
+  const apply = () => {
+    if (window._applySchoolSettings) {
+      window._applySchoolSettings(data);
+    } else {
+      setTimeout(apply, 100);
+    }
+  };
+  apply();
 });
 // Listens to admin/scheduleOverrides and keeps window._scheduleOverrides in sync.
 // Triggers a re-render of the schedule whenever overrides change.
@@ -689,22 +696,28 @@ window._schoolSettings = {};
 
 window._applySchoolSettings = function(data) {
   if (!data) return;
-  // Update header labels
+  const school   = data.schoolName || 'P.S./I.S. 104';
+  const grade    = data.grade      || 'Grade 6';
+  const cls      = data.className  || '601';
+  const homeroom = data.homeroom   || '6-208';
+
+  // App header (small text above "My Schedule")
   const headerEl = document.getElementById('app-school-name');
-  if (headerEl) {
-    const school   = data.schoolName || 'P.S./I.S. 104';
-    const grade    = data.grade      || 'Grade 6';
-    const cls      = data.className  || '601';
-    headerEl.textContent = `${school} · ${grade} · Class ${cls}`;
-  }
-  // Update chat subtitle
+  if (headerEl) headerEl.textContent = `${school} · ${grade} · Class ${cls}`;
+
+  // Chat subtitle
   const chatSub = document.querySelector('.chat-subtitle');
-  if (chatSub) {
-    const homeroom = data.homeroom  || '6-208';
-    const cls      = data.className || '601';
-    chatSub.textContent = `${homeroom} · Class ${cls}`;
-  }
-  // Force re-render so period times update
+  if (chatSub) chatSub.textContent = `${homeroom} · Class ${cls}`;
+
+  // Entrance subtitle
+  const entranceSub = document.querySelector('#entrance-screen .entrance-sub');
+  if (entranceSub) entranceSub.textContent = `${school} · Select your class to get started`;
+
+  // Rebuild the class card on entrance screen so grade/homeroom/class update
+  const classGrid = document.getElementById('class-grid');
+  if (classGrid) buildEntrance();
+
+  // Force schedule re-render so period times update
   if (window._forceRender) window._forceRender();
 };
 
@@ -798,16 +811,26 @@ function goToApp() {
 }
 
 function buildEntrance() {
+  const s        = window._schoolSettings || {};
+  const school   = s.schoolName || 'P.S./I.S. 104';
+  const grade    = s.grade      || 'Grade 6';
+  const cls      = s.className  || '601';
+  const homeroom = s.homeroom   || '6-208';
+
   const grid = document.getElementById('class-grid');
   grid.innerHTML = CLASSES.map((c, i) => `
     <button class="class-btn${c.available && c.id === selectedClass ? ' active-class' : ''}"
       style="animation-delay:${0.35 + i*0.08}s"
       onclick="pickClass('${c.id}')">
-      <div class="class-btn-label">${c.grade}</div>
-      <div>6-208</div>
-      <div class="class-btn-label" style="opacity:0.5;margin-top:2px">Homeroom 601</div>
+      <div class="class-btn-label">${grade}</div>
+      <div>${homeroom}</div>
+      <div class="class-btn-label" style="opacity:0.5;margin-top:2px">Homeroom ${cls}</div>
     </button>`).join('');
   grid.insertAdjacentHTML('afterend', '<div style="width:100%;text-align:center;font-size:12px;font-weight:700;color:var(--text3);margin-top:6px;letter-spacing:0.04em;">More classes coming soon</div>');
+
+  // Update entrance subtitle
+  const sub = document.querySelector('#entrance-screen .entrance-sub');
+  if (sub) sub.textContent = `${school} · Select your class to get started`;
 }
 
 function pickClass(id) {
