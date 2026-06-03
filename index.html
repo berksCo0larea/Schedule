@@ -162,6 +162,13 @@
   .room-badge { font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:3px 8px;flex-shrink:0;font-weight:700;font-family:var(--mono); }
   .dot { width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;animation:pulse 1.5s infinite; }
 
+  /* override badge — small pill shown on overridden periods */
+  .override-badge {
+    font-size:9px;font-weight:900;background:rgba(245,158,11,.15);color:#f59e0b;
+    border:1px solid rgba(245,158,11,.3);border-radius:5px;padding:1px 5px;
+    flex-shrink:0;text-transform:uppercase;letter-spacing:.05em;
+  }
+
   .chat-section {
     margin-top: 20px;
     background: var(--bg2);
@@ -605,6 +612,24 @@ onValue(serverMsgRef, (snap) => {
   const data = snap.val() || {};
   window._handleServerMessage(data.active === true, data.text || '', data.type || 'info');
 });
+
+// ── ADMIN: schedule overrides listener ──
+// Listens to admin/scheduleOverrides and keeps window._scheduleOverrides in sync.
+// Triggers a re-render of the schedule whenever overrides change.
+const schedOverridesRef = ref(db, 'admin/scheduleOverrides');
+onValue(schedOverridesRef, (snap) => {
+  const raw = snap.val() || {};
+  // Sanitise: keep only plain objects for each day, ignore updatedAt at day level
+  const overrides = {};
+  for (const [day, val] of Object.entries(raw)) {
+    if (val && typeof val === 'object') {
+      overrides[day] = val;
+    }
+  }
+  window._scheduleOverrides = overrides;
+  // If the app is already showing, force a full re-render
+  if (window._forceRender) window._forceRender();
+});
 </script>
 
 <script>
@@ -637,6 +662,9 @@ let chatUsername = localStorage.getItem('chatUsername') || '';
 let chatMessages = [];
 let typingTimeout = null;
 let isCurrentlyTyping = false;
+
+// ── Schedule overrides store (populated by Firebase listener above) ──
+window._scheduleOverrides = {};
 
 window._chatUsername = () => chatUsername;
 
@@ -884,10 +912,34 @@ const baseSchedule = {
   ],
 };
 
+/*
+ * getSchedule()
+ * ─────────────
+ * Merges admin/scheduleOverrides on top of baseSchedule.
+ * For each period the admin has overridden (stored as pN in Firebase),
+ * we replace only name/teacher/room — times stay from base.
+ * Period 3 elective substitution still works on top of any override.
+ */
 function getSchedule() {
+  const overrides = window._scheduleOverrides || {};
   const out = {};
-  for (const [day, periods] of Object.entries(baseSchedule))
-    out[day] = periods.map(p => ({...p, name: p.name === '__ELECTIVE__' ? selectedElective : p.name}));
+  for (const [day, periods] of Object.entries(baseSchedule)) {
+    const dayOv = overrides[day] || {};
+    out[day] = periods.map(p => {
+      const key = `p${p.p}`;
+      const ov  = dayOv[key] || {};
+      // Start with the base period, then apply any admin overrides
+      const merged = { ...p };
+      if (ov.name)    merged.name    = ov.name;
+      if (ov.teacher) merged.teacher = ov.teacher;
+      if (ov.room)    merged.room    = ov.room;
+      // Mark whether this period has an admin override (for the badge)
+      merged._overridden = Object.keys(ov).length > 0;
+      // Still apply elective substitution on top
+      if (merged.name === '__ELECTIVE__') merged.name = selectedElective;
+      return merged;
+    });
+  }
   return out;
 }
 
@@ -1100,12 +1152,20 @@ function fullRender(schedule,now,viewDay,realDay,isSchoolDay) {
   nxtSec.innerHTML = (isToday && nxt)
     ? `<div class="next-card"><div><div class="next-label">up next · Period ${nxt.p}</div><div class="next-class">${nxt.name}</div></div><div class="next-time">${fmt12(nxt.start)}</div></div>` : '';
 
+  // Period list — include override badge on overridden periods
   document.getElementById('schedule-list').innerHTML = dayPeriods.map(p => {
     const isPast   = isToday && toMins(p.end) <= nowMins;
     const isActive = isToday && cur && cur.p === p.p;
-    return`<div class="period-row${isActive?' active-row':isPast?' past-row':''}"><div class="period-num${isActive?' active-num':''}">${p.p}</div><div class="period-info"><div class="period-class">${p.name}</div><div class="period-teacher">${p.teacher}</div></div><div class="room-badge">Rm ${p.room}</div><div class="period-time">${fmt12(p.start)}</div>${isActive?'<div class="dot"></div>':''}</div>`;
+    const ovBadge  = p._overridden ? '<span class="override-badge">✏️ updated</span>' : '';
+    return`<div class="period-row${isActive?' active-row':isPast?' past-row':''}"><div class="period-num${isActive?' active-num':''}">${p.p}</div><div class="period-info"><div class="period-class">${p.name}</div><div class="period-teacher">${p.teacher}</div></div>${ovBadge}<div class="room-badge">Rm ${p.room}</div><div class="period-time">${fmt12(p.start)}</div>${isActive?'<div class="dot"></div>':''}</div>`;
   }).join('');
 }
+
+// Expose a force-render function for the Firebase override listener to call
+window._forceRender = function() {
+  _lastViewDay = null; // invalidate cache so fullRender fires
+  render();
+};
 
 function render() {
   const schedule = getSchedule(), now = getNYTime(), realDay = getDayName(now);
@@ -1174,9 +1234,6 @@ function runIntro() {
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
-/* ════════════════════════════════════════
-   ADMIN HANDLERS
-════════════════════════════════════════ */
 let _serverMsgDismissed = false;
 
 window._handleMaintenance = function(active, message, eta) {
