@@ -1203,8 +1203,19 @@ function fullRender(schedule,now,viewDay,realDay,isSchoolDay) {
     const secsLeft = Math.max(0, (endMins - nowMins - now.getSeconds()/60)*60);
     curSec.innerHTML=`<div class="current-card"><div class="accent" style="background:${color}"></div><div class="inner"><div class="period-label"><span class="dot"></span>Period ${cur.p} · now</div><div class="class-name">${cur.name}</div><div class="teacher">${cur.teacher} · Room ${cur.room}</div><div class="time-row"><div><div class="countdown" id="countdown-val">${fmtCountdown(Math.round(secsLeft))}</div><div class="countdown-label">until end</div></div><div class="time-badge">${fmt12(cur.start)} – ${fmt12(cur.end)}</div></div><div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:${pct.toFixed(2)}%;background:${color}"></div></div></div></div>`;
   } else {
-    const firstStart = toMins(dayPeriods[0]?.start||'8:10');
-    curSec.innerHTML=`<div class="current-card"><div style="padding:4px 0"><div class="period-label">${nowMins<firstStart?"school hasn't started yet":"school's done"}</div><div class="class-name">${nowMins<firstStart?'First period at '+fmt12(dayPeriods[0]?.start||'8:10'):now.getDay()===5?'See you next week!':'See you tomorrow!'}</div></div></div>`;
+    const firstStart = toMins(dayPeriods[0]?.start || '8:10');
+    const lastEnd    = toMins(dayPeriods[dayPeriods.length-1]?.end || '14:25');
+    const schoolDone = nowMins >= lastEnd;
+    const notStarted = nowMins < firstStart;
+    // During a gap between periods — show next period coming up
+    if (!schoolDone && !notStarted && nxt) {
+      const minsUntil = toMins(nxt.start) - nowMins;
+      curSec.innerHTML=`<div class="current-card"><div style="padding:4px 0"><div class="period-label">🔔 passing period</div><div class="class-name">${nxt.name} in ${minsUntil} min${minsUntil!==1?'s':''}</div></div></div>`;
+    } else if (notStarted) {
+      curSec.innerHTML=`<div class="current-card"><div style="padding:4px 0"><div class="period-label">school hasn't started yet</div><div class="class-name">First period at ${fmt12(dayPeriods[0]?.start||'8:10')}</div></div></div>`;
+    } else {
+      curSec.innerHTML=`<div class="current-card"><div style="padding:4px 0"><div class="period-label">school's done</div><div class="class-name">${now.getDay()===5?'See you next week!':'See you tomorrow!'}</div></div></div>`;
+    }
   }
 
   const nxtSec = document.getElementById('next-section');
