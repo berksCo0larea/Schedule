@@ -603,17 +603,38 @@ window._setChatConnStatus = setChatConnStatus;
 const maintenanceRef = ref(db, 'admin/maintenance');
 onValue(maintenanceRef, (snap) => {
   const data = snap.val() || {};
-  window._handleMaintenance(data.active === true, data.message || 'Back soon!', data.eta || '');
+  const apply = () => {
+    if (window._handleMaintenance) {
+      window._handleMaintenance(data.active === true, data.message || 'Back soon!', data.eta || '');
+    } else {
+      setTimeout(apply, 100);
+    }
+  };
+  apply();
 });
 
 // ── ADMIN: server message listener ──
 const serverMsgRef = ref(db, 'admin/serverMessage');
 onValue(serverMsgRef, (snap) => {
   const data = snap.val() || {};
-  window._handleServerMessage(data.active === true, data.text || '', data.type || 'info');
+  // Retry until the global handler is defined
+  const apply = () => {
+    if (window._handleServerMessage) {
+      window._handleServerMessage(data.active === true, data.text || '', data.type || 'info');
+    } else {
+      setTimeout(apply, 100);
+    }
+  };
+  apply();
 });
 
-// ── ADMIN: schedule overrides listener ──
+// ── ADMIN: school settings listener ──
+const schoolSettingsRef = ref(db, 'admin/schoolSettings');
+onValue(schoolSettingsRef, (snap) => {
+  const data = snap.val() || {};
+  window._schoolSettings = data;
+  if (window._applySchoolSettings) window._applySchoolSettings(data);
+});
 // Listens to admin/scheduleOverrides and keeps window._scheduleOverrides in sync.
 // Triggers a re-render of the schedule whenever overrides change.
 const schedOverridesRef = ref(db, 'admin/scheduleOverrides');
@@ -662,6 +683,41 @@ let chatUsername = localStorage.getItem('chatUsername') || '';
 let chatMessages = [];
 let typingTimeout = null;
 let isCurrentlyTyping = false;
+
+// School settings store
+window._schoolSettings = {};
+
+window._applySchoolSettings = function(data) {
+  if (!data) return;
+  // Update header labels
+  const headerEl = document.getElementById('app-school-name');
+  if (headerEl) {
+    const school   = data.schoolName || 'P.S./I.S. 104';
+    const grade    = data.grade      || 'Grade 6';
+    const cls      = data.className  || '601';
+    headerEl.textContent = `${school} · ${grade} · Class ${cls}`;
+  }
+  // Update chat subtitle
+  const chatSub = document.querySelector('.chat-subtitle');
+  if (chatSub) {
+    const homeroom = data.homeroom  || '6-208';
+    const cls      = data.className || '601';
+    chatSub.textContent = `${homeroom} · Class ${cls}`;
+  }
+  // Force re-render so period times update
+  if (window._forceRender) window._forceRender();
+};
+
+// Expose a getter so getSchedule can read live times
+window._getPeriodTimes = function() {
+  const settings = window._schoolSettings || {};
+  if (settings.times && Array.isArray(settings.times)) {
+    const map = {};
+    settings.times.forEach(t => { map[t.p] = { start: t.start, end: t.end }; });
+    return map;
+  }
+  return null;
+};
 
 // ── Schedule overrides store (populated by Firebase listener above) ──
 window._scheduleOverrides = {};
@@ -921,21 +977,24 @@ const baseSchedule = {
  * Period 3 elective substitution still works on top of any override.
  */
 function getSchedule() {
-  const overrides = window._scheduleOverrides || {};
+  const overrides  = window._scheduleOverrides || {};
+  const customTimes = window._getPeriodTimes ? window._getPeriodTimes() : null;
   const out = {};
   for (const [day, periods] of Object.entries(baseSchedule)) {
     const dayOv = overrides[day] || {};
     out[day] = periods.map(p => {
       const key = `p${p.p}`;
       const ov  = dayOv[key] || {};
-      // Start with the base period, then apply any admin overrides
       const merged = { ...p };
       if (ov.name)    merged.name    = ov.name;
       if (ov.teacher) merged.teacher = ov.teacher;
       if (ov.room)    merged.room    = ov.room;
-      // Mark whether this period has an admin override (for the badge)
+      // Apply custom times from school settings if present
+      if (customTimes && customTimes[p.p]) {
+        merged.start = customTimes[p.p].start;
+        merged.end   = customTimes[p.p].end;
+      }
       merged._overridden = Object.keys(ov).length > 0;
-      // Still apply elective substitution on top
       if (merged.name === '__ELECTIVE__') merged.name = selectedElective;
       return merged;
     });
